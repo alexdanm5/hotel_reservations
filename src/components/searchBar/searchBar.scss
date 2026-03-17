@@ -1,0 +1,35 @@
+@use '../../styles/variables/variables.scss' as *;
+
+.searchBar {
+    &__wrapper {
+        display: flex;
+        width: 338px;
+    }
+    &__spn {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        height: 50px;
+        width: 32px;
+        background: rgba($gray-light, 0.3);
+        border-radius: 10px 0px 0px 10px;
+    }
+    &__input {
+        height: 50px;
+        width: 276px;
+        background: rgba($gray-light, 0.3);
+        border: none;
+        padding-left: 14px;
+        font-weight: 400;
+        font-size: 16px;
+        letter-spacing: -0.02em;
+        color: $black-text;
+    }
+    &__btn {
+        height: 50px;
+        width: 30px;
+        background: rgba($gray-light, 0.3);
+        border-radius: 0px 10px 10px 0px;
+        border: none;
+    }
+}

@@ -1,0 +1,10 @@
+.hotelRating {
+    &__rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    &__rating-star {
+        color: rgba(255, 255, 255, 0.5);
+    }
+}

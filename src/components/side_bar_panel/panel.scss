@@ -1,0 +1,21 @@
+@use '../../styles/variables/variables.scss' as *;
+
+.panel {
+    position: fixed;
+    bottom: 0;
+    width: 375px;
+    height: 78px;
+    padding: 14px 19px;
+    display: flex;
+    justify-content: space-between;
+    background: $white;
+    z-index: 1000;
+    &__link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        width: 50px;
+        height: 50px;
+    }
+}
