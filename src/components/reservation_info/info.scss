@@ -1,0 +1,26 @@
+@use '../../styles/variables/variables.scss' as *;
+
+.info {
+    display: flex;
+    flex-direction: column;
+    &__details {
+        margin-top: 13px;
+        padding: 16px 0;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 200%;
+        letter-spacing: -0.02em;
+        color: $gray-dark;
+    }
+    &__price {
+        margin-top: 36px;
+        font-weight: 700;
+        font-size: 36px;
+        line-height: 130%;
+        letter-spacing: -0.02em;
+        color: $black-text;
+    }
+    &__btn {
+        margin-top: 31px;
+    }
+}

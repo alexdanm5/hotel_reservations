@@ -1,0 +1,13 @@
+.headerBack {
+    display: flex;
+    align-items: center;
+    gap: 24px
+    &__back {
+        width: 14px;
+        height: 22px;
+    }
+    &__text {
+        font-weight: 700; 
+        font-size: 28px;
+    }
+}

@@ -7,7 +7,11 @@ const  Home = () => {
     return (
         <div style={{ position: "relative", paddingBottom: "100px" }} className="home">
             <Promo />
-            <Recommended title="Recommended" />
+            
+            <div style={{marginTop: "35px"}}>
+                <Recommended title="Recommended" />
+            </div>
+            
             <Deals title="Deals" />
             <SideBarPanel />
         </div>
