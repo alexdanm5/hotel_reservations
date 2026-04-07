@@ -11,10 +11,10 @@ import './App.scss';
 function App() {
   return (
     <div className="App">
-      {/* <Home /> */}
+      <Home />
       {/* <Result /> */}
 
-      <Search />
+      {/* <Search /> */}
       {/* <ReservationPersonalData /> */}
       {/* <ReservationPaymantData /> */}
       {/* <ReservationConfirm /> */}
