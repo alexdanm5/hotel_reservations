@@ -1,3 +1,6 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+
 import Home from '../pages/Home';
 import Result from '../pages/Result';
 import Search from '../pages/Search';
@@ -11,10 +14,14 @@ import './App.scss';
 function App() {
   return (
     <div className="App">
-      {/* <Home /> */}
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/search' element={<Search />} />
+        </Routes>
+      </BrowserRouter>
       {/* <Result /> */}
 
-      <Search />
       {/* <ReservationPersonalData /> */}
       {/* <ReservationPaymantData /> */}
       {/* <ReservationConfirm /> */}
