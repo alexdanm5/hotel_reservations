@@ -6,7 +6,7 @@ import PersonalData from "../personal_data/PersonalData"
 const ReservationPersonalData = () => {
     return (
         <div style={{padding: "40px 19px 24px 18px"}}>
-            <HeaderBack />
+            <HeaderBack header={"Reservation"}/>
 
             <div style={{marginTop: '46px', display: 'flex', justifyContent: 'center'}}>
                <Pagination />
