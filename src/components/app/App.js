@@ -2,6 +2,7 @@ import Home from '../pages/Home';
 import Result from '../pages/Result';
 import Search from '../pages/Search';
 import User from '../pages/User';
+import Notifications from '../pages/Notifications';
 import RoomsList from '../pages/Rooms_list';
 import ReservationPersonalData from '../pages/Reservation_personal_data';
 import ReservationPaymantData from '../pages/Reservation_paymant_data';
@@ -15,11 +16,11 @@ function App() {
     <div className="App">
       {/* <Home /> */}
       {/* <Result /> */}
-
       {/* <Search /> */}
+      <Notifications />
 
       {/* <User /> */}
-      <RoomsList />
+      {/* <RoomsList /> */}
       {/* <ReservationPersonalData /> */}
       {/* <ReservationPaymantData /> */}
       {/* <ReservationConfirm /> */}
