@@ -1,0 +1,28 @@
+@use '../../styles/variables/variables.scss' as *;
+
+.menu {
+    margin-top: 29px;
+    margin-left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    &__items {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    &__icon {
+        width: 21px;
+        height: 17px;
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    }
+    &__link {
+        font-weight: 600;
+        font-size: 20px;
+        color: $black-text;
+    }
+}
