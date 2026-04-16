@@ -1,8 +1,18 @@
+import { useNavigate } from 'react-router-dom';
+
 import MainBtn from '../main_btn/MainBtn';
 
 import './hotelBookingForm.scss';
 
 const HotelBookingForm = () => {
+    
+    const navigate = useNavigate();
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        navigate('/result');
+    }
+
     return (
         <div className='bookingForm'>
             <form className='bookingForm__form'>
@@ -22,7 +32,7 @@ const HotelBookingForm = () => {
                     <option value="3">3 Nights</option>
                     <option value="4">4 Nights</option>
                 </select>
-                <div className='bookingForm__btn'><MainBtn text="Search a room" /></div>
+                <div className='bookingForm__btn'><MainBtn text="Search a room" onClick={handleSearch} /></div>
             </form>
         </div>
     )

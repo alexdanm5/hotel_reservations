@@ -1,13 +1,14 @@
+import { Link } from "react-router-dom";
 
 import arrow from "../../assets/arrow/chevron-left.png";
 import './headerBack.scss';
 
-const HeaderBack = ({header}) => {
+const HeaderBack = ({header, path}) => {
     return (
         <div className='headerBack'>
-                <a className='headerBack__back'>
+                <Link to={path} className='headerBack__back'>
                     <img src={arrow} alt="Back"/>
-                </a>
+                </Link>
                 <div className='headerBack__text'>{header}</div>
         </div>
     )

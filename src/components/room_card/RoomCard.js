@@ -1,8 +1,17 @@
+import { useNavigate } from "react-router-dom";
 
 import photo from "../../assets/Background.png"
 import './card.scss';
 
 const RoomCard = () => {
+    const navigate = useNavigate();
+
+    const handleSelect = (e) => {
+        e.preventDefault();
+        // Логика сохранения выбранного номера в состояние
+        navigate('/reservation_personal_data');
+    }
+
 
     return(
         <div className='card'>
@@ -25,7 +34,9 @@ const RoomCard = () => {
                     <div className='card__price-money'>$ 1480</div>
                     <div className='card__price-night'>2 nights</div>
                 </div>
-                <button className='card__btn'>Select</button>
+                <button className='card__btn' onClick={handleSelect}>
+                    Select
+                </button>
             </div>
         </div>
     )
