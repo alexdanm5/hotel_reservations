@@ -1,9 +1,19 @@
+import { useNavigate } from 'react-router-dom';
+
 import MainBtn from "../main_btn/MainBtn";
 
 import './paymantData.scss';
 import placeholderCard from '../../assets/Checkout/CreditCard.png';
 
 const PaymantData = () => {
+    const navigate = useNavigate();
+
+    const handleGoToPayment = (e) => {
+        e.preventDefault();
+        // валидация данных формы и сохранение их в состояние
+        navigate('/reservation_confirm');
+    }
+
     return (
         <div className='paymantData'>
                 <div className='paymantData__img'>
@@ -23,7 +33,7 @@ const PaymantData = () => {
                     </div>
                 </form>  
                 <div className='paymantData__btn'>
-                    <MainBtn text="Go to Confirmation" />
+                    <MainBtn text="Go to Confirmation" onClick={handleGoToPayment} />
                 </div>
         </div> 
     )

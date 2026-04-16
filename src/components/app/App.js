@@ -1,3 +1,6 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+
 import Home from '../pages/Home';
 import Result from '../pages/Result';
 import Search from '../pages/Search';
@@ -15,16 +18,21 @@ import './App.scss';
 function App() {
   return (
     <div className="App">
-      {/* <Home /> */}
-      {/* <Result /> */}
-      {/* <Search /> */}
-      {/* <Notifications /> */}
-      {/* <User /> */}
-      <Hotel />
-      {/* <RoomsList /> */}
-      {/* <ReservationPersonalData /> */}
-      {/* <ReservationPaymantData /> */}
-      {/* <ReservationConfirm /> */}
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/search' element={<Search />} />
+          <Route path='/notifications' element={<Notifications />} />
+          <Route path='/user' element={<User />} />
+          <Route path='/result' element={<Result />} />
+          <Route path='/hotel' element={<Hotel />} />
+          <Route path='/hotel/rooms_list' element={<RoomsList />} />
+          <Route path='/reservation_personal_data' element={<ReservationPersonalData />} />
+          <Route path='/reservation_paymant_data' element={<ReservationPaymantData />} />
+          <Route path='/reservation_confirm' element={<ReservationConfirm />} />
+        </Routes>
+      </BrowserRouter>
+
     </div>
   );
 }

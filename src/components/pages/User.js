@@ -6,7 +6,7 @@ import SideBarPanel from '../side_bar_panel/SideBarPanel';
 const User = () => {
 
     return(
-        <div style={{padding: "40px 19px 100px 18px", height: "100vh"}}>
+        <div style={{padding: "40px 19px 100px 0", height: "100vh"}}>
             <UserHead />
 
             <UserMenu />

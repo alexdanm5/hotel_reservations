@@ -1,9 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 import HotelCardPreview from "../hotel_card_preview/HotelCardPreview";
 import MainBtn from "../main_btn/MainBtn";
 
 import './info.scss';
 
 const ReservationInfo = () => {
+    const navigate = useNavigate();
+
+    const handleCompleteReservation = () => {
+        // Logic for completing reservation
+        navigate('/'); 
+    };
+
     return (
         <div className="info">
             <HotelCardPreview />
@@ -15,7 +24,7 @@ const ReservationInfo = () => {
             </div>
             <div className='info__price'>$1400 USD</div>
             <div className='info__btn'>
-                <MainBtn text="Complete" />
+                <MainBtn text="Complete" onClick={handleCompleteReservation} />
             </div>
         </div>
     )
