@@ -1,19 +1,22 @@
+import { lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-
-import Home from '../pages/Home';
-import Result from '../pages/Result';
-import Search from '../pages/Search';
-import User from '../pages/User';
-import Notifications from '../pages/Notifications';
-import Hotel from '../pages/Hotel';
-import RoomsList from '../pages/Rooms_list';
-import ReservationPersonalData from '../pages/Reservation_personal_data';
-import ReservationPaymantData from '../pages/Reservation_paymant_data';
-import ReservationConfirm from '../pages/Reservation_confirm';
-
-
 import './App.scss';
+
+const Home = lazy(() => import('../pages/Home'));
+const Result = lazy(() => import('../pages/Result'));
+const Search = lazy(() => import('../pages/Search'));
+const User = lazy(() => import('../pages/User'));
+const Notifications = lazy(() => import('../pages/Notifications'));
+const Hotel = lazy(() => import('../pages/Hotel'));
+const RoomsList = lazy(() => import('../pages/Rooms_list'));
+const ReservationPersonalData = lazy(() => import('../pages/Reservation_personal_data'));
+const ReservationPaymantData = lazy(() => import('../pages/Reservation_paymant_data'));
+const ReservationConfirm = lazy(() => import('../pages/Reservation_confirm'));
+
+
+
+
 
 function App() {
   return (
