@@ -21,7 +21,6 @@ const ReservationConfirm = lazy(() => import('../pages/Reservation_confirm'));
 function App() {
   return (
     <div className="App">
-<<<<<<< HEAD
       <Home />
       {/* <Result /> */}
 
@@ -29,7 +28,6 @@ function App() {
       {/* <ReservationPersonalData /> */}
       {/* <ReservationPaymantData /> */}
       {/* <ReservationConfirm /> */}
-=======
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Home />} />
@@ -45,7 +43,6 @@ function App() {
         </Routes>
       </BrowserRouter>
 
->>>>>>> main
     </div>
   );
 }
