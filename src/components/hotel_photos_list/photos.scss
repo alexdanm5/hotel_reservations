@@ -1,0 +1,20 @@
+
+.photos {
+    display: grid;
+    grid-template-columns: repeat(3, 125px);
+    grid-template-rows: 255px 80px;
+    img {
+        &:nth-child(1) {
+            grid-column: 1 / 4;
+        }
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+    
+}
