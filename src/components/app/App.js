@@ -21,6 +21,13 @@ const ReservationConfirm = lazy(() => import('../pages/Reservation_confirm'));
 function App() {
   return (
     <div className="App">
+      <Home />
+      {/* <Result /> */}
+
+      {/* <Search /> */}
+      {/* <ReservationPersonalData /> */}
+      {/* <ReservationPaymantData /> */}
+      {/* <ReservationConfirm /> */}
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Home />} />
