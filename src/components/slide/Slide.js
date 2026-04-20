@@ -2,19 +2,19 @@ import HotelRating from '../hotel_rating/HotelRating';
 import hotel from '../../assets/hotel.png';
 import './slide.scss';
 
-function Slide() {
+function Slide({name, location, price, rating}) {
 
     return (
-        <div id='' className='slide'>
+        <div className='slide'>
             <img src={hotel} alt="Hotel" className='slide__img'/>
             <div className='slide__content'>
-                <h3 className='slide__name'>Lux Hotel with a Pool</h3>
+                <h3 className='slide__name'>{name}</h3>
                 <div className='slide__info'>
-                    <div className='slide__location'>Dubai</div>
+                    <div className='slide__location'>{location}</div>
                     <div className='slide__wrapper'>
-                        <div className='slide__price'>$700~</div>
+                        <div className='slide__price'>${price}</div>
                         <div className='slide__rating'>
-                            <HotelRating />
+                            <HotelRating rating={rating} />
                         </div>
                     </div>
                     

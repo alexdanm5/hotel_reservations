@@ -1,12 +1,12 @@
 
 import './hotelRating.scss';
 
-const HotelRating = () => {
+const HotelRating = ({ rating }) => {
 
     return (
         <div className='hotelRating'>
             <div className='slide__rating'>
-                <span className='slide__rating-number'>4.5</span>
+                <span className='slide__rating-number'>{rating}</span>
                 <span className='slide__rating-star'>★</span>
             </div>
         </div>
