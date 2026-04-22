@@ -45,10 +45,11 @@
         font-size: 18px;
     }
     &__info {
+        width: 235px;
         margin-top: 5px;
         display: flex;
         align-items: center;
-        gap: 113px;
+        justify-content: space-between;
         font-weight: 600;
     }
     &__location {

@@ -9,14 +9,16 @@ export const hotelsApi = createApi({
   endpoints: (builder) => ({
     
     getRecommendedHotels: builder.query({
-      query: () => 'recommend', // Это приклеится к BASE_URL -> .../api/v1/hotels
+      query: () => 'recommend', 
+    }),
+    getDealsHotels: builder.query({
+      query: () => 'deal', 
+    }),
+    getHotelById: builder.query({
+      query: (id) => `hotels/${id}`, 
     }),
 
-    // Здесь можно добавить другие запросы, например:
-    // getHotelById: builder.query({ query: (id) => `hotels/${id}` })
   }),
 });
 
-// RTK Query АВТОМАТИЧЕСКИ генерирует хук на основе имени эндпоинта!
-// getRecommendedHotels превращается в useGetRecommendedHotelsQuery
-export const { useGetRecommendedHotelsQuery } = hotelsApi;
+export const { useGetRecommendedHotelsQuery, useGetDealsHotelsQuery, useGetHotelByIdQuery } = hotelsApi;

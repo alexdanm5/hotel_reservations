@@ -28,7 +28,7 @@ function App() {
           <Route path='/notifications' element={<Notifications />} />
           <Route path='/user' element={<User />} />
           <Route path='/result' element={<Result />} />
-          <Route path='/hotel' element={<Hotel />} />
+          <Route path='/hotel/:id' element={<Hotel />} />
           <Route path='/hotel/rooms_list' element={<RoomsList />} />
           <Route path='/reservation_personal_data' element={<ReservationPersonalData />} />
           <Route path='/reservation_paymant_data' element={<ReservationPaymantData />} />

@@ -1,4 +1,28 @@
+@use '../../styles/variables/variables.scss' as *;
+
 .deals {
     margin-top: 21px;
     padding-left: 18px;
+    &__title {
+        margin-left: 3px;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        color: $black-text;
+    }
+    &__slider {
+        margin-top: 18px;
+    }
+    &__spiner {
+        display: block;
+        margin: 40px auto 0 auto;
+    }
+    &__error {
+        margin-top: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 16px;
+        font-weight: 400;
+    }
 }
