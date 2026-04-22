@@ -1,27 +1,46 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useGetHotelByIdQuery } from "../../store/hotelsApi";
+import { useParams } from "react-router-dom";
 
 import HotelRating from "../hotel_rating/HotelRating";
 import Photos from "../hotel_photos_list/Photos";
 import Options from "../options/Options";
 import MainBtn from "../main_btn/MainBtn";
 
+import spiner from '../../assets/Spinner.svg';
 import arrow from "../../assets/arrow/chevron-left.png";
 
 const Hotel = () => {
 
+    const { id } = useParams();
+    const { data: hotel = {}, error, isLoading } = useGetHotelByIdQuery(id);
     const navigate = useNavigate();
 
     const handleSelectRooms = () => {
         navigate('/hotel/rooms_list');
     }
 
+    if (isLoading) {
+        return <img src={spiner} alt='spinner' style={{"display": "block", "margin": "50px auto"}} />
+    }
+
+    if (error) {
+        return <div style={{"textAlign": "center", "marginTop": "50px", "color": "#393939"}}>Error: {error.message || 'Помилка завантаження'}</div>
+    }
+
+
+    const { name, rating, photo, options } = hotel;
+
     return (
         <div>
             <div style={{"position": "relative"}}>
-                <Link to={`/result`} style={{"display": "block", "position": "absolute", "top": "20px", "left": "18px", "zIndex": "1000"}} >
+                <div to={`/result`} 
+                style={{"position": "absolute", "top": "20px", "left": "18px", "zIndex": "1000"}}
+                onClick={() => navigate(-1)}
+                >
                     <img src={arrow} alt="Back"/>
-                </Link>
-                <Photos/>
+                </div>
+                <Photos photos={photo} />
             </div>
             
 
@@ -37,7 +56,7 @@ const Hotel = () => {
                     "fontSize": "28px",
                     "letterSpacing": "-0.02em",
                     "color": "#393939"
-                }}>Beach Resort Lux</div>
+                }}>{name}</div>
                 <div style={{
                     "display": "flex",
                     "alignItems": "center",
@@ -52,10 +71,10 @@ const Hotel = () => {
                     "letterSpacing": "-0.02em",
                     "color": "#fff",
                     "textShadow": "0 0 2px 0 rgba(0, 0, 0, 0.25)"
-                }}><HotelRating/></div>
+                }}><HotelRating rating={rating}/></div>
             </div>
             <div style={{"fontSize": "16px"}}>
-                <Options/>
+                <Options options={options} />
             </div>
 
             <div style={{"marginTop": "23px", "padding": "0 19px 30px 18px"}}>

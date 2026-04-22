@@ -12,11 +12,10 @@ const  Home = () => {
         <div style={{ position: "relative", paddingBottom: "100px" }} className="home">
             <Promo />
             
-            <div style={{marginTop: "35px"}}>
-                <Recommended title="Recommended" />
-            </div>
+            <Recommended />
             
-            <Deals title="Deals" />
+            <Deals />
+            
             <SideBarPanel />
         </div>
     );
