@@ -13,9 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/controllers/HotelController.php';
 
 
-$requestUri = $_SERVER['REQUEST_URI'];
+$pathOnly = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-$uriParts = explode('/', trim($requestUri, '/'));
+$uriParts = explode('/', trim($pathOnly, '/'));
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 if ($uriParts[0] === 'recommend') {
@@ -46,7 +46,21 @@ if ($uriParts[0] === 'recommend') {
         $hotelController->fetchHotelData($hotelId);
     }
     exit();
+} else if ($uriParts[0] === 'search') {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['param'])) {
+        $hotelController = new HotelController();
+
+        $searchParam = $_GET['param'];
+
+        $hotelController->searchHotels($searchParam);
+             
+    } else {
+        http_response_code(400);
+        echo json_encode(["error" => "Отсутствует параметр поиска"]);
+    }
+    
+    exit();
 }
 
 http_response_code(404);
-echo json_encode(["error" => "Неизвестный маршрут"]);
+echo json_encode(["error" => "Невідомий маршрут"]);

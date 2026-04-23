@@ -4,17 +4,18 @@ import HotelCard from '../hotelCard/HotelCard';
 
 import './hotelList.scss';
 
-const HotelList = () => {
+const HotelList = ({ hotels }) => {
 
     return (
         <div className='hotelList'>
-            <Link to={`/hotel`} style={{'textDecoration': 'none'}}><HotelCard /></Link>
-            
-            <HotelCard />
-            <HotelCard />
-            <HotelCard />
+            {hotels.map(hotel => (
+                <Link to={`/hotel/${hotel.id}`} style={{'textDecoration': 'none'}} key={hotel.id}>
+                    <HotelCard hotel={hotel} />
+                </Link>
+            ))}
         </div>
     )
 }
+
 
 export default HotelList;
