@@ -35,6 +35,33 @@ class HotelController {
         return $cleanHotelsId; 
     }
 
+    private function getAllHotels() {
+        $response = file_get_contents($this->apiUrl . 'hotels');
+        
+        if ($response === false) {
+            return null; 
+        }
+
+        $doc = json_decode($response, true);
+        $document = $doc['documents'] ?? []; 
+        $allHotels = [];
+
+        foreach($document as $hotelDoc) {
+            $hotelId = strripos($hotelDoc['name'], '/') + 1;
+            $hotelId = substr($hotelDoc['name'], $hotelId); 
+            $fields = $hotelDoc['fields'] ?? [];
+            $hotel = [
+                'id' => $hotelId,
+                'name' => isset($fields['name']['stringValue']) ? $fields['name']['stringValue'] : '',
+                'location' => isset($fields['location']['stringValue']) ? $fields['location']['stringValue'] : '',
+            ];
+            $allHotels[] = $hotel;
+        }
+
+        return $allHotels;
+
+    }
+
     public function fetchHotelData($id) {
         $response = file_get_contents($this->apiUrl . 'hotels/' . $id);
         
@@ -71,6 +98,7 @@ class HotelController {
             'id' => $id,
             'name' => isset($fields['name']['stringValue']) ? $fields['name']['stringValue'] : '',
             'location' => isset($fields['location']['stringValue']) ? $fields['location']['stringValue'] : '',
+            'description' => isset($fields['description']['stringValue']) ? $fields['description']['stringValue'] : '',
             'rating' => isset($fields['rating']['doubleValue']) ? $fields['rating']['doubleValue'] : 0.0,
             'photo' => $photoUrl,
             'options' => $options,
@@ -97,6 +125,36 @@ class HotelController {
         $finalHotels = [];
 
         foreach ($ids as $id) {
+            $hotelData = $this->fetchHotelData($id);
+            
+            if ($hotelData !== null) {
+                $finalHotels[] = $hotelData;
+            }
+        }
+
+        http_response_code(200);
+        echo json_encode($finalHotels);
+    }
+
+    private function filterHotelsByParam($param) {
+        $allHotels = $this->getAllHotels();
+        $filteredHotels = [];
+
+        foreach ($allHotels as $hotel) {
+            
+            if (stripos($hotel['name'], $param) !== false || stripos($hotel['location'], $param) !== false) {
+                $filteredHotels[] = $hotel['id'];
+            }
+        }
+
+        return $filteredHotels;
+    }
+
+    public function searchHotels($param) {
+        $filteredHotelIds = $this->filterHotelsByParam($param);
+        $finalHotels = [];
+
+        foreach ($filteredHotelIds as $id) {
             $hotelData = $this->fetchHotelData($id);
             
             if ($hotelData !== null) {
