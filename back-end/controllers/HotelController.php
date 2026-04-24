@@ -166,4 +166,45 @@ class HotelController {
         echo json_encode($finalHotels);
     }
 
+    public function getRoomsListByHotelId($hotelId) {
+        $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms');
+        
+        if ($response === false) {
+            return null; 
+        }
+
+        $doc = json_decode($response, true);
+        $document = $doc['documents'] ?? []; 
+        $roomsList = [];
+
+        foreach($document as $roomDoc) {
+            $roomId = strripos($roomDoc['name'], '/') + 1;
+            $roomId = substr($roomDoc['name'], $roomId); 
+            $fields = $roomDoc['fields'] ?? [];
+            $options = [];
+            $photoUrl = [];
+            foreach ($fields['options']['arrayValue']['values'] as $item) {
+                if (isset($item['stringValue'])) {
+                    $options[] = $item['stringValue']; 
+                }
+            }
+            foreach ($fields['photo']['arrayValue']['values'] as $item) {
+                if (isset($item['stringValue'])) {
+                    $photoUrl[] = $item['stringValue']; 
+                }
+            }
+            $room = [
+                'id' => $roomId,
+                'type' => isset($fields['type']['stringValue']) ? $fields['type']['stringValue'] : '',
+                'price' => isset($fields['pricePerNight']['integerValue']) ? $fields['pricePerNight']['integerValue'] : 0.0,
+                'capacity' => isset($fields['capacity']['integerValue']) ? (int)$fields['capacity']['integerValue'] : 0,
+                'photo' => $photoUrl,
+                'options' => $options,
+            ];
+            $roomsList[] = $room;
+        }
+        http_response_code(200);
+        echo json_encode($roomsList);
+    }
+
 }

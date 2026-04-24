@@ -60,6 +60,14 @@ if ($uriParts[0] === 'recommend') {
     }
     
     exit();
+} else if ($uriParts[2] === 'rooms_list' && isset($uriParts[1]) ) {
+    $hotelId = $uriParts[1];
+    $hotelController = new HotelController();
+
+    if ($requestMethod === 'GET') {
+        $hotelController->getRoomsListByHotelId($hotelId);
+    }
+    exit();
 }
 
 http_response_code(404);

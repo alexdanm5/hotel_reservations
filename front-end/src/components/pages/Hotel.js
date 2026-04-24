@@ -1,6 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useGetHotelByIdQuery } from "../../store/hotelsApi";
-import { useParams } from "react-router-dom";
 
 import HotelRating from "../hotel_rating/HotelRating";
 import Photos from "../hotel_photos_list/Photos";
@@ -11,13 +10,17 @@ import spiner from '../../assets/Spinner.svg';
 import arrow from "../../assets/arrow/chevron-left.png";
 
 const Hotel = () => {
-
     const { id } = useParams();
     const { data: hotel = {}, error, isLoading } = useGetHotelByIdQuery(id);
-    const navigate = useNavigate();
+    
+    const location = useLocation();
+    const navigateBack = useNavigate();
+    const navigateToRoomsList = useNavigate();
 
     const handleSelectRooms = () => {
-        navigate('/hotel/rooms_list');
+        navigateToRoomsList(`/hotel/${id}/rooms_list`, { 
+            state: { from: location.pathname + location.search }
+        });
     }
 
     if (isLoading) {
@@ -36,7 +39,7 @@ const Hotel = () => {
             <div style={{"position": "relative"}}>
                 <div to={`/result`} 
                 style={{"position": "absolute", "top": "20px", "left": "18px", "zIndex": "1000"}}
-                onClick={() => navigate(-1)}
+                onClick={() => navigateBack(-1)}
                 >
                     <img src={arrow} alt="Back"/>
                 </div>
