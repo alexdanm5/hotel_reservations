@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import Slider from 'react-slick';
 
-// import photo from "../../assets/Background.png"
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import './card.scss';
 
 const RoomCard = ({room}) => {
@@ -13,12 +16,25 @@ const RoomCard = ({room}) => {
         navigate('/reservation_personal_data');
     }
 
+    const settings = {
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1
+    };
+
 
     return(
         <div className='card'>
-            <div className='card__img'>
-                <img src={photo} alt="Room" />
-            </div>
+
+                <Slider {...settings} className='card__slider'>
+                    {photo.map((img, index) => (
+                        <div key={index} className='card__img'>
+                            <img src={img} alt={`Room ${index + 1}`}  />
+                        </div>
+                    ))}
+                </Slider>
+
 
             <div className='card__name'>{type}</div>
 

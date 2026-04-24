@@ -8,16 +8,34 @@
     border-radius: 10px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
     background: $white;
-    &__img {
+    &__slider {
         width: 100%;
         height: 184px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
         overflow: hidden;
+
+        .slick-prev {
+            left: 2px;
+            z-index: 10;
+            &:before {
+                color: $peach;
+            }
+        }
+        .slick-next {
+            right: 2px;
+            z-index: 10;
+            &:before {
+                color: $peach;
+            }
+        }
+    }
+    &__img {
+        height: 184px;
         img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
     }
     &__name {
