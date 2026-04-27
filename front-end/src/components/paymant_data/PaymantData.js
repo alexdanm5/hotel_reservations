@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { setReservationData }  from "../../store/userReservationDataSlice";
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
@@ -25,8 +27,10 @@ const cardValidationSchema = Yup.object().shape({
 const PaymantData = () => {
     const navigate = useNavigate();
 
-    const handleGoToPayment = (e) => {
-        e.preventDefault();
+    const dispatch = useDispatch();
+    const savedDates = useSelector(state => state.userReservationData);
+
+    const handleGoToPayment = () => {
         navigate('/reservation_confirm');
     }
 
@@ -37,34 +41,37 @@ const PaymantData = () => {
                 cardNumber: '',
                 expiry: '',
                 cvc: '',
-                name: ''
+                name: '',
+                ...savedDates
             }}
-            onSubmit={handleGoToPayment}
+            onSubmit={(values) => {
+                dispatch(setReservationData(values));
+                handleGoToPayment();
+            }}
         >
-                
 
-                <Form className='paymantData__inputs'>
-                    <div className='paymantData__img'>
-                        <img src={placeholderCard} alt="placeholder card" />
-                    </div>
-                    <Field type="text" placeholder='Card number' name="cardNumber" />
-                    <ErrorMessage name="cardNumber" className="paymantData__error" />
-                    <div className='paymantData__inputs-half'>
-                        <Field type="text" placeholder='Expiry' name="expiry" />
-                        <ErrorMessage name="expiry" className="paymantData__error" />
-                        <Field type="text" placeholder='CVC' name="cvc" />
-                        <ErrorMessage name="cvc" className="paymantData__error" />
-                    </div>
-                    <Field className="paymantData__inputs-name" type="text" placeholder='Name' name="name" />
-                    <ErrorMessage name="name" className="paymantData__error" />
-                    <div className='paymantData__save'>
-                        <Field type="checkbox" id='save' />
-                        <label htmlFor="save">Save this credit card</label>
-                    </div>
-                    <div className='paymantData__btn'>
-                        <MainBtn text="Go to Confirmation" onClick={handleGoToPayment} />
-                    </div>
-                </Form>  
+            <Form className='paymantData__inputs'>
+                <div className='paymantData__img'>
+                    <img src={placeholderCard} alt="placeholder card" />
+                </div>
+                <Field type="text" placeholder='Card number' name="cardNumber" />
+                <ErrorMessage name="cardNumber" className="paymantData__error" />
+                <div className='paymantData__inputs-half'>
+                    <Field type="text" placeholder='Expiry' name="expiry" />
+                    <ErrorMessage name="expiry" className="paymantData__error" />
+                    <Field type="text" placeholder='CVC' name="cvc" />
+                    <ErrorMessage name="cvc" className="paymantData__error" />
+                </div>
+                <Field className="paymantData__inputs-name" type="text" placeholder='Name' name="name" />
+                <ErrorMessage name="name" className="paymantData__error" />
+                <div className='paymantData__save'>
+                    <Field type="checkbox" id='save' />
+                    <label htmlFor="save">Save this credit card</label>
+                </div>
+                <div className='paymantData__btn'>
+                    <MainBtn text="Go to Confirmation" onClick={null} />
+                </div>
+            </Form>  
                 
         </Formik> 
     )

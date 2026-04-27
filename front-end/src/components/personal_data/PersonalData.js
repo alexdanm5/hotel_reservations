@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { setReservationData }  from "../../store/userReservationDataSlice";
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
@@ -33,8 +35,10 @@ const userValidationSchema = Yup.object().shape({
 const PersonalData = () => {
     const navigate = useNavigate();
 
-    const handleGoToPayment = (e) => {
-        e.preventDefault();
+    const dispatch = useDispatch();
+    const savedDates = useSelector(state => state.userReservationData);
+
+    const handleGoToPayment = () => {
         navigate('/reservation_paymant_data');
     }
     
@@ -48,9 +52,13 @@ const PersonalData = () => {
                 address: '',
                 postCode: '',
                 country: '',
-                phone: ''
+                phone: '',
+                ...savedDates
             }}
-            onSubmit={handleGoToPayment}
+            onSubmit={(values) => {
+                dispatch(setReservationData(values));
+                handleGoToPayment();
+            }}
         >
             <Form className="personalData__form">
                 <Field className="personalData__input" type="text" name="firstName" placeholder="First Name" />
@@ -68,7 +76,7 @@ const PersonalData = () => {
                 <Field className="personalData__input" type="tel" name="phone" placeholder="Phone Number" />
                 <ErrorMessage name="phone"  className="personalData__error" />
                 <div className="personalData__btn">
-                    <MainBtn text="Go to Payment" onClick={handleGoToPayment} />
+                    <MainBtn text="Go to Payment" onClick={null} />
                 </div>
             </Form>
             
