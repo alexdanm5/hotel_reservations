@@ -1,33 +1,78 @@
 import { useNavigate } from "react-router-dom";
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 import MainBtn from "../main_btn/MainBtn";
 
 import './personalData.scss';
+
+const userValidationSchema = Yup.object().shape({
+    firstName: Yup.string()
+           .min(2, 'Must be at least 2 characters')
+           .required('Required'),
+    lastName: Yup.string()
+            .min(2, 'Must be at least 2 characters')
+            .required('Required'),
+    email: Yup.string()
+            .email('Invalid email address')
+            .required('Required'),
+    address: Yup.string()
+            .min(5, 'Must be at least 5 characters')
+            .required('Required'),
+    postCode: Yup.string()
+            .matches(/^\d{5}(-\d{4})?$/, 'Invalid post code')
+            .required('Required'),
+    country: Yup.string()
+            .min(2, 'Must be at least 2 characters')
+            .required('Required'),
+    phone: Yup.string()
+            .matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
+            .required('Required')
+});
 
 const PersonalData = () => {
     const navigate = useNavigate();
 
     const handleGoToPayment = (e) => {
         e.preventDefault();
-        // валидация данных формы и сохранение их в состояние
         navigate('/reservation_paymant_data');
     }
     
     return (
-        <div className="personalData">
-            <form className="personalData__form">
-                <input className="personalData__input" type="text" placeholder="First Name" />
-                <input className="personalData__input" type="text" placeholder="Last Name" />
-                <input className="personalData__input" type="email" placeholder="Email Address" />
-                <input className="personalData__input" type="text" placeholder="Address" />
-                <input className="personalData__input" type="text" placeholder="Post Code" />
-                <input className="personalData__input" type="text" placeholder="Country" />
-                <input className="personalData__input" type="tel" placeholder="Phone Number" />
-            </form>
-            <div className="personalData__btn">
-                <MainBtn text="Go to Payment" onClick={handleGoToPayment} />
-            </div>
-        </div>
+        <Formik className="personalData"
+            validationSchema={userValidationSchema}
+            initialValues={{
+                firstName: '',
+                lastName: '',
+                email: '',
+                address: '',
+                postCode: '',
+                country: '',
+                phone: ''
+            }}
+            onSubmit={handleGoToPayment}
+        >
+            <Form className="personalData__form">
+                <Field className="personalData__input" type="text" name="firstName" placeholder="First Name" />
+                <ErrorMessage name="firstName"  className="personalData__error" />
+                <Field className="personalData__input" type="text" name="lastName" placeholder="Last Name" />
+                <ErrorMessage name="lastName"  className="personalData__error" />  
+                <Field className="personalData__input" type="email" name="email" placeholder="Email Address" />
+                <ErrorMessage name="email"  className="personalData__error" />
+                <Field className="personalData__input" type="text" name="address" placeholder="Address" />
+                <ErrorMessage name="address"  className="personalData__error" />
+                <Field className="personalData__input" type="text" name="postCode" placeholder="Post Code" />
+                <ErrorMessage name="postCode"  className="personalData__error" />
+                <Field className="personalData__input" type="text" name="country" placeholder="Country" />
+                <ErrorMessage name="country"  className="personalData__error" />
+                <Field className="personalData__input" type="tel" name="phone" placeholder="Phone Number" />
+                <ErrorMessage name="phone"  className="personalData__error" />
+                <div className="personalData__btn">
+                    <MainBtn text="Go to Payment" onClick={handleGoToPayment} />
+                </div>
+            </Form>
+            
+        </Formik>
     )
 }
 
