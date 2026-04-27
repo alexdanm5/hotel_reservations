@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Slider from 'react-slick';
+import { useDispatch } from 'react-redux';
+import { setReservationData }  from "../../store/hotelReservationDataSlice";
 
 
 import "slick-carousel/slick/slick.css";
@@ -9,10 +11,12 @@ import './card.scss';
 const RoomCard = ({room}) => {
     const { id, type, price, photo, options } = room;
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleSelect = (e) => {
         e.preventDefault();
-        // Логика сохранения выбранного номера в состояние
+
+        dispatch(setReservationData(roomData));
         navigate('/reservation_personal_data');
     }
 
@@ -22,6 +26,14 @@ const RoomCard = ({room}) => {
         slidesToShow: 1,
         slidesToScroll: 1
     };
+
+    const roomData = {
+        roomId: id,
+        type,
+        price
+    };
+
+
 
 
     return(

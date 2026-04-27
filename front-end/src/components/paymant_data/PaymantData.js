@@ -1,41 +1,94 @@
+import { useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { setReservationData }  from "../../store/userReservationDataSlice";
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 import MainBtn from "../main_btn/MainBtn";
 
 import './paymantData.scss';
 import placeholderCard from '../../assets/Checkout/CreditCard.png';
 
+const cardValidationSchema = Yup.object().shape({
+    cardNumber: Yup.string()
+        .matches(/^\d{16}$/, 'Card number must be 16 digits')
+        .required('Required'),
+    expiry: Yup.string()
+        .matches(/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/, 'Invalid expiry date')
+        .required('Required'),
+    cvc: Yup.string()
+        .matches(/^\d{3,4}$/, 'CVC must be 3 or 4 digits')
+        .required('Required'),
+    name: Yup.string()
+        .min(2, 'Must be at least 2 characters')
+        .required('Required')
+});
+
+
 const PaymantData = () => {
     const navigate = useNavigate();
 
-    const handleGoToPayment = (e) => {
-        e.preventDefault();
-        // валидация данных формы и сохранение их в состояние
+    const dispatch = useDispatch();
+    const savedDates = useSelector(state => state.userReservationData);
+
+    const handleGoToPayment = () => {
         navigate('/reservation_confirm');
     }
 
+    const savedHotelData = useSelector(state => state.hotelReservationData);
+
+    useEffect(() => {
+ 
+    if (!savedHotelData || Object.keys(savedHotelData).length === 0) {
+        navigate('/', { replace: true });
+    }
+    }, [savedHotelData, navigate]);
+
+    if (!savedHotelData || Object.keys(savedHotelData).length === 0) {
+        return null; 
+    }
+
     return (
-        <div className='paymantData'>
+        <Formik className='paymantData'
+            validationSchema={cardValidationSchema}
+            initialValues={{
+                cardNumber: '',
+                expiry: '',
+                cvc: '',
+                name: '',
+                ...savedDates
+            }}
+            onSubmit={(values) => {
+                dispatch(setReservationData(values));
+                handleGoToPayment();
+            }}
+        >
+
+            <Form className='paymantData__inputs'>
                 <div className='paymantData__img'>
                     <img src={placeholderCard} alt="placeholder card" />
                 </div>
-
-                <form className='paymantData__inputs'>
-                    <input type="text" placeholder='Card number' />
-                    <div className='paymantData__inputs-half'>
-                        <input type="text" placeholder='Expiry' />
-                        <input type="text" placeholder='CVC' />
-                    </div>
-                    <input className="paymantData__inputs-name" type="text" placeholder='Name' />
-                    <div className='paymantData__save'>
-                        <input type="checkbox" id='save' />
-                        <label htmlFor="save">Save this credit card</label>
-                    </div>
-                </form>  
-                <div className='paymantData__btn'>
-                    <MainBtn text="Go to Confirmation" onClick={handleGoToPayment} />
+                <Field type="text" placeholder='Card number' name="cardNumber" />
+                <ErrorMessage name="cardNumber" className="paymantData__error" />
+                <div className='paymantData__inputs-half'>
+                    <Field type="text" placeholder='Expiry' name="expiry" />
+                    <ErrorMessage name="expiry" className="paymantData__error" />
+                    <Field type="text" placeholder='CVC' name="cvc" />
+                    <ErrorMessage name="cvc" className="paymantData__error" />
                 </div>
-        </div> 
+                <Field className="paymantData__inputs-name" type="text" placeholder='Name' name="name" />
+                <ErrorMessage name="name" className="paymantData__error" />
+                <div className='paymantData__save'>
+                    <Field type="checkbox" id='save' />
+                    <label htmlFor="save">Save this credit card</label>
+                </div>
+                <div className='paymantData__btn'>
+                    <MainBtn text="Go to Confirmation" onClick={null} />
+                </div>
+            </Form>  
+                
+        </Formik> 
     )
 }
 
