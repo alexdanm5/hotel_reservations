@@ -1,5 +1,7 @@
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {useGetRoomListByHotelIdQuery} from "../../store/hotelsApi";
+import { useSelector } from 'react-redux';
+
 
 
 import HeaderBack from "../header_back/HeaderBack"
@@ -14,11 +16,15 @@ const RoomsList = () => {
     const navigate = useNavigate()
     const location = useLocation();
 
-    const goBackUrl = location.state?.from || '/';
-
     const handleBack = () => {
-        navigate(goBackUrl);
+        if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1); 
+        } else {
+            navigate(location.state?.from || '/', { replace: true });
+        }
     }
+
+    const savedHotelData = useSelector(state => state.hotelReservationData);
 
     const { data: rooms = [], isUninitialized, isFetching, error } = useGetRoomListByHotelIdQuery(id, { skip: !id });
     
@@ -37,7 +43,7 @@ const RoomsList = () => {
 
     return (
         <div style={{padding: "40px 19px 24px 18px", background: "#f5f5f5"}}>
-            <HeaderBack header={'Beach Resort Lux'} onBack={handleBack}/>
+            <HeaderBack header={savedHotelData.name} onBack={handleBack}/>
 
             <div style={{marginTop: "26px", display: "flex", flexDirection: "column", gap: "19px"}}>
                 {status}

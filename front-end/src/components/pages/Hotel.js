@@ -1,7 +1,7 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useGetHotelByIdQuery } from "../../store/hotelsApi";
 import { useDispatch } from 'react-redux';
-import { setReservationData }  from "../../store/hotelReservationDataSlice";
+import { setReservationData, clearReservationData }  from "../../store/hotelReservationDataSlice";
 
 import HotelRating from "../hotel_rating/HotelRating";
 import Photos from "../hotel_photos_list/Photos";
@@ -53,7 +53,9 @@ const Hotel = () => {
             <div style={{"position": "relative"}}>
                 <div to={`/result`} 
                 style={{"position": "absolute", "top": "20px", "left": "18px", "zIndex": "1000"}}
-                onClick={() => navigateBack(-1)}
+                onClick={() => {    navigateBack(-1);
+                                    dispatch(clearReservationData());
+                                }}
                 >
                     <img src={arrow} alt="Back"/>
                 </div>
