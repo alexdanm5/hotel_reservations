@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import HotelCardPreview from "../hotel_card_preview/HotelCardPreview";
 import MainBtn from "../main_btn/MainBtn";
@@ -9,13 +10,25 @@ import './info.scss';
 const ReservationInfo = () => {
     const navigate = useNavigate();
 
+    const reservationData = useSelector(state => state.hotelReservationData);
+    
     const handleCompleteReservation = () => {
         // Logic for completing reservation
         navigate('/'); 
     };
 
-    const reservationData = useSelector(state => state.hotelReservationData);
-    console.log(reservationData);
+    useEffect(() => {
+ 
+        if (!reservationData || Object.keys(reservationData).length === 0) {
+            navigate('/', { replace: true });
+        }
+    }, [reservationData, navigate]);
+
+    if (!reservationData || Object.keys(reservationData).length === 0) {
+        return null; 
+    }
+
+    
 
     return (
         <div className="info">

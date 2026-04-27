@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { setReservationData }  from "../../store/userReservationDataSlice";
@@ -35,11 +36,24 @@ const userValidationSchema = Yup.object().shape({
 const PersonalData = () => {
     const navigate = useNavigate();
 
+
     const dispatch = useDispatch();
     const savedDates = useSelector(state => state.userReservationData);
 
+    const savedHotelData = useSelector(state => state.hotelReservationData);
+
     const handleGoToPayment = () => {
         navigate('/reservation_paymant_data');
+    }
+
+  useEffect(() => {
+        if (!savedHotelData || Object.keys(savedHotelData).length === 0) {
+            navigate('/', { replace: true });
+        }
+    }, [savedHotelData, navigate]);
+
+    if (!savedHotelData || Object.keys(savedHotelData).length === 0) {
+        return null; 
     }
     
     return (
