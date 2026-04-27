@@ -1,5 +1,7 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useGetHotelByIdQuery } from "../../store/hotelsApi";
+import { useDispatch } from 'react-redux';
+import { setReservationData }  from "../../store/hotelReservationDataSlice";
 
 import HotelRating from "../hotel_rating/HotelRating";
 import Photos from "../hotel_photos_list/Photos";
@@ -12,6 +14,8 @@ import arrow from "../../assets/arrow/chevron-left.png";
 const Hotel = () => {
     const { id } = useParams();
     const { data: hotel = {}, error, isLoading } = useGetHotelByIdQuery(id);
+
+    const dispatch = useDispatch();
     
     const location = useLocation();
     const navigateBack = useNavigate();
@@ -33,6 +37,16 @@ const Hotel = () => {
 
 
     const { name, rating, photo, options } = hotel;
+    const hotelData = {
+            hotelId: id,
+            name,
+            rating,
+            photo
+        };
+    
+    const addHotelData = () => {
+        dispatch(setReservationData(hotelData));
+    }
 
     return (
         <div>
@@ -81,7 +95,10 @@ const Hotel = () => {
             </div>
 
             <div style={{"marginTop": "23px", "padding": "0 19px 30px 18px"}}>
-                <MainBtn text={"Select Rooms"} onClick={handleSelectRooms}/>
+                <MainBtn text={"Select Rooms"} onClick={() => {
+                    handleSelectRooms();
+                    addHotelData();
+                }}/>
             </div>
         </div>
     )

@@ -1,6 +1,7 @@
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {useGetRoomListByHotelIdQuery} from "../../store/hotelsApi";
 
+
 import HeaderBack from "../header_back/HeaderBack"
 import RoomCard from "../room_card/RoomCard";
 
@@ -32,6 +33,7 @@ const RoomsList = () => {
     } else if (rooms.length === 0) {
         status = <div>Готелі не знайдено.</div>;
     }
+
 
     return (
         <div style={{padding: "40px 19px 24px 18px", background: "#f5f5f5"}}>
