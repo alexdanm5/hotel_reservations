@@ -13,22 +13,36 @@
     }
     &__input {
         border-radius: 10px;
+        border: none;
         width: 220px;
         height: 50px;
-        background: $gray-light;
-        opacity: 0.1;
+        background: rgba($gray-light, 0.1);
         padding-left: 14px;
         font-weight: 400;
         font-size: 16px;
         letter-spacing: -0.02em;
         color: $gray;
+        &-date {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+    }
+    &__wrapper {
+        position: relative;
+    }
+    &__calendar {
+        position: absolute; 
+        top: 100%;
+        left: 0;
+        z-index: 10;
     }
     &__select {
         border-radius: 10px;
+        border: none;
         width: 100px;
         height: 50px;
-        background: $gray-light;
-        opacity: 0.1;
+        background: rgba($gray-light, 0.1);
         padding-left: 15px;
         font-weight: 400;
         font-size: 16px;
