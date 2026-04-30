@@ -15,9 +15,11 @@ const HotelBookingForm = () => {
     
     const navigate = useNavigate();
 
+
     const handleSearch = (e) => {
         e.preventDefault();
-        navigate('/result');
+        const queryString = new URLSearchParams(dataForSearch).toString();
+        navigate(`/result?${queryString}`);
     }
 
     const [openDate, setOpenDate] = useState(false);
@@ -33,14 +35,13 @@ const HotelBookingForm = () => {
     const [dataForSearch, setDataForSearch] = useState({
         location: '',
         guests: '',
-        nights: '',
-        startDate: '',
-        endDate: '', 
+        startDate: format(new Date(), 'MM/dd/yyyy'),
+        endDate: format(new Date(), 'MM/dd/yyyy'), 
     });
 
     return (
         <div className='bookingForm'>
-            <form className='bookingForm__form'>
+            <form className='bookingForm__form' onSubmit={handleSearch}>
                 <input type="text" 
                     placeholder='Place' 
                     className='bookingForm__input' 
@@ -89,17 +90,6 @@ const HotelBookingForm = () => {
                         </div>
                     )}
                 </div>
-                <select className='bookingForm__select' 
-                        name='nights' 
-                        value={dataForSearch.nights} 
-                        onChange={(e) => setDataForSearch({ ...dataForSearch, nights: e.target.value })}
-                >
-                    <option value="">Nights</option>
-                    <option value="1">1 Night</option>
-                    <option value="2">2 Nights</option>
-                    <option value="3">3 Nights</option>
-                    <option value="4">4 Nights</option>
-                </select>
                 <div className='bookingForm__btn'><MainBtn text="Search a room" onClick={handleSearch} /></div>
             </form>
         </div>

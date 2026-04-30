@@ -16,6 +16,8 @@ const RoomsList = () => {
     const navigate = useNavigate()
     const location = useLocation();
 
+    const availableRoomIds = location.state?.availableRoomIds || [];
+
     const handleBack = () => {
         if (window.history.state && window.history.state.idx > 0) {
             navigate(-1); 
@@ -40,6 +42,10 @@ const RoomsList = () => {
         status = <div>Готелі не знайдено.</div>;
     }
 
+    const roomsToShow = availableRoomIds.length > 0 
+        ? rooms.filter(room => availableRoomIds.includes(room.id))
+        : rooms;
+
 
     return (
         <div style={{padding: "40px 19px 24px 18px", background: "#f5f5f5"}}>
@@ -47,7 +53,7 @@ const RoomsList = () => {
 
             <div style={{marginTop: "26px", display: "flex", flexDirection: "column", gap: "19px"}}>
                 {status}
-                {status || rooms.map(room => <RoomCard key={room.id} room={room} />)}
+                {status || roomsToShow.map(room => <RoomCard key={room.id} room={room} />)}
             </div>
         </div>
     )

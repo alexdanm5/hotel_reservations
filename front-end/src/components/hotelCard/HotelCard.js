@@ -9,7 +9,7 @@ const HotelCard = ({hotel}) => {
             <HotelCardPreview hotel={hotel} />
             <div className='hotelCard__detals'>
                 <div className='hotelCard__text'>{hotel.description}</div>
-                <div className='hotelCard__price'>$100</div>
+                <div className='hotelCard__price'>${hotel.priceFrom}</div>
             </div>
         </div>
     )

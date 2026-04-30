@@ -8,7 +8,7 @@ const store = configureStore({
     reducer: {
         [hotelsApi.reducerPath]: hotelsApi.reducer,
         hotelReservationData: hotelReservationDataReducer,
-        userReservationData: userReservationDataReducer
+        userReservationData: userReservationDataReducer,
     },
     middleware: getDefaultMiddleware => getDefaultMiddleware().concat(hotelsApi.middleware),
     devTools: process.env.NODE_ENV !== 'production',
