@@ -9,8 +9,13 @@ const HotelList = ({ hotels }) => {
     return (
         <div className='hotelList'>
             {hotels.map(hotel => (
-                <Link to={`/hotel/${hotel.id}`} style={{'textDecoration': 'none'}} key={hotel.id}>
-                    <HotelCard hotel={hotel} />
+                
+                <Link to={`/hotel/${hotel.id}`} 
+                      style={{'textDecoration': 'none'}}   
+                      key={hotel.id}
+                      state={hotel.availableRooms ? { availableRoomIds: hotel.availableRooms } : null}
+                >
+                    <HotelCard hotel={hotel}/>
                 </Link>
             ))}
         </div>

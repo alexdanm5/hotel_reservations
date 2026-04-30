@@ -3,7 +3,7 @@ import './slide.scss';
 
 function Slide({hotel}) {
 
-    const { name, location, rating = 0, photo = [] } = hotel;
+    const { name, location, rating = 0, photo = [], priceFrom } = hotel;
 
     return (
         <div className='slide'>
@@ -13,7 +13,7 @@ function Slide({hotel}) {
                 <div className='slide__info'>
                     <div className='slide__location'>{location}</div>
                     <div className='slide__wrapper'>
-                        <div className='slide__price'>$100</div>
+                        <div className='slide__price'>${priceFrom}</div>
                         <div className='slide__rating'>
                             <HotelRating rating={rating} />
                         </div>

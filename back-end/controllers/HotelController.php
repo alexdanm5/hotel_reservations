@@ -102,6 +102,7 @@ class HotelController {
             'rating' => isset($fields['rating']['doubleValue']) ? $fields['rating']['doubleValue'] : 0.0,
             'photo' => $photoUrl,
             'options' => $options,
+            'priceFrom' => isset($fields['priceFrom']['integerValue']) ? $fields['priceFrom']['integerValue'] : 0
 
         ];
 
@@ -166,6 +167,35 @@ class HotelController {
         echo json_encode($finalHotels);
     }
 
+    public function getHotelsByParam($location, $guests, $startDate, $endDate) {
+        $filteredByLocation = $this->filterHotelsByParam($location);
+        $filteredByCapacity = [];
+        $filteredHotels = [];
+        $isAvailable  = [];
+
+        foreach ($filteredByLocation as $id) {
+            $capacityFilteredRooms = $this->filteredRoomsByCapacity($id, $guests);
+            if (!empty($capacityFilteredRooms)) {
+                $filteredByCapacity += array($id => $capacityFilteredRooms);
+            }
+        }
+
+        foreach($filteredByCapacity as $hotelId => $roomIds) {
+            foreach ($roomIds as $roomId) {
+                $isAvailable [] = $this->filterRoomByDate($hotelId, $roomId, $startDate, $endDate);
+            }
+            if (!empty($isAvailable)) {
+                $hotelData = $this->fetchHotelData($hotelId);
+                $hotelData['availableRooms'] = $isAvailable;
+                $filteredHotels[] = $hotelData;
+            }
+        }
+
+
+        http_response_code(200);
+        echo json_encode($filteredHotels);
+    }
+
     public function getRoomsListByHotelId($hotelId) {
         $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms');
         
@@ -207,4 +237,61 @@ class HotelController {
         echo json_encode($roomsList);
     }
 
+    private function filteredRoomsByCapacity($hotelId, $guests) {
+        $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms');
+        
+        if ($response === false) {
+            return null; 
+        }
+
+        $doc = json_decode($response, true);
+        $document = $doc['documents'] ?? []; 
+        $filteredList = [];
+
+        foreach($document as $roomDoc) {
+            $roomId = strripos($roomDoc['name'], '/') + 1;
+            $roomId = substr($roomDoc['name'], $roomId); 
+            $fields = $roomDoc['fields'] ?? [];
+
+            $capacity = isset($fields['capacity']['integerValue']) ? (int)$fields['capacity']['integerValue'] : 0;
+            if ($capacity >= (int)$guests) {
+                 $filteredList[] = $roomId;
+            }
+        }
+        return $filteredList;
+    }
+
+    private function filterRoomByDate($hotelId, $roomId, $checkIn, $checkOut) {
+        $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms' . '/' . $roomId);
+    
+        if ($response === false) {
+            return null; 
+        }
+
+        $doc = json_decode($response, true);
+    
+        $fields = $doc['fields'] ?? [];
+
+        $dates = isset($fields['date']['arrayValue']['values']) 
+                ? $fields['date']['arrayValue']['values'] 
+                : [];
+
+        $newCheckIn = new DateTime($checkIn);
+        $newCheckOut = new DateTime($checkOut);
+
+        if(empty($dates)) {
+            return $roomId; 
+        }
+        
+        foreach ($dates as $date) {
+            $bookedDate = explode('-', $date['stringValue']);
+            $bookedStartDate = new DateTime($bookedDate[0]);
+            $bookedEndDate = new DateTime($bookedDate[1]);
+
+            if ($newCheckIn < $bookedEndDate && $newCheckOut > $bookedStartDate) {
+                return false; 
+            }
+        }
+        return $roomId; 
+    }
 }

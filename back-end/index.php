@@ -60,12 +60,24 @@ if ($uriParts[0] === 'recommend') {
     }
     
     exit();
-} else if ($uriParts[2] === 'rooms_list' && isset($uriParts[1]) ) {
+} else if (isset($uriParts[2]) && $uriParts[2] === 'rooms_list' && isset($uriParts[1]) ) {
     $hotelId = $uriParts[1];
     $hotelController = new HotelController();
 
     if ($requestMethod === 'GET') {
         $hotelController->getRoomsListByHotelId($hotelId);
+    }
+    exit();
+} else if ($uriParts[0] === 'result') {
+    $hotelController = new HotelController();
+
+    if ($requestMethod === 'GET') {
+        $location = isset($_GET['location']) ? $_GET['location'] : '';
+        $guests = isset($_GET['guests']) ? $_GET['guests'] : '';
+        $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : '';
+        $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : '';
+
+        $hotelController->getHotelsByParam($location, $guests, $startDate, $endDate);
     }
     exit();
 }

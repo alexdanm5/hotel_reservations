@@ -21,9 +21,11 @@ const Hotel = () => {
     const navigateBack = useNavigate();
     const navigateToRoomsList = useNavigate();
 
+    const availableRoomIds = location.state?.availableRoomIds || [];
+
     const handleSelectRooms = () => {
         navigateToRoomsList(`/hotel/${id}/rooms_list`, { 
-            state: { from: location.pathname + location.search }
+            state: { from: location.pathname + location.search, availableRoomIds: availableRoomIds }
         });
     }
 
