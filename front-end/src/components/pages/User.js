@@ -1,6 +1,6 @@
 
-import UserHead from "../userHead/UserHead"
-import UserMenu from "../userMenu/UserMenu";
+import { Outlet } from "react-router-dom";
+import UserHead from "../userHead/UserHead";
 import SideBarPanel from '../side_bar_panel/SideBarPanel';
 
 const User = () => {
@@ -9,7 +9,9 @@ const User = () => {
         <div style={{padding: "40px 19px 100px 0", height: "100vh"}}>
             <UserHead />
 
-            <UserMenu />
+
+            <Outlet />
+
             <SideBarPanel />
         </div>
     )
