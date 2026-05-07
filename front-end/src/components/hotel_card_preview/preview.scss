@@ -58,4 +58,13 @@
         letter-spacing: -0.02em;
         text-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.25);
     }
+    &__like {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 24px;
+        height: 24px;
+        z-index: 3;
+        cursor: pointer;
+    }
 }
