@@ -40,9 +40,9 @@ const PaymantData = () => {
 
     useEffect(() => {
  
-    if (!savedHotelData || Object.keys(savedHotelData).length === 0) {
-        navigate('/', { replace: true });
-    }
+        if (!savedHotelData || Object.keys(savedHotelData).length === 0) {
+            navigate('/', { replace: true });
+        }
     }, [savedHotelData, navigate]);
 
     if (!savedHotelData || Object.keys(savedHotelData).length === 0) {

@@ -116,8 +116,19 @@ class HotelController {
             http_response_code(200);
             echo json_encode($hotel);
         }
-
         
+    }
+
+    public function getSomeHotelsById($ids) {
+        $hotels = [];
+        foreach ($ids as $id) {
+            $hotelData = $this->fetchHotelData($id);
+            if ($hotelData !== null) {
+                $hotels[] = $hotelData;
+            }
+        }
+        http_response_code(200);
+        echo json_encode($hotels);
     }
 
     public function getSuggestionsHotels($collection) {

@@ -1,7 +1,7 @@
 <?php
 
 header("Access-Control-Allow-Origin: http://localhost:3000"); 
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8"); 
 
@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/controllers/HotelController.php';
 
+require_once __DIR__ . '/controllers/UserController.php';
 
 $pathOnly = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -80,7 +81,43 @@ if ($uriParts[0] === 'recommend') {
         $hotelController->getHotelsByParam($location, $guests, $startDate, $endDate);
     }
     exit();
+} else if ($uriParts[0] === 'user' && isset($uriParts[1]) && $uriParts[1] === 'favorit-hotels') {
+    $userController = new UserController();
+    $hotelController = new HotelController();
+
+    if ($requestMethod === 'GET') {
+        $favoriteHotelIds = $userController->getFavoritesHotels();
+        $favoriteHotelsData = [];
+
+        $hotelController->getSomeHotelsById($favoriteHotelIds);
+
+    }
+    exit();
+} else if ($uriParts[0] === 'addToFavorites' && $requestMethod === 'POST') {
+            
+            $inputData = json_decode(file_get_contents('php://input'), true);
+
+            $userController = new UserController();
+
+            $userController->addHotelToFavorites($inputData['hotelId']);
+            exit();
+} else if ($uriParts[0] === 'removeFromFavorites' && $requestMethod === 'DELETE') {
+            
+            $inputData = json_decode(file_get_contents('php://input'), true);
+
+            $userController = new UserController();
+
+            $userController->removeHotelFromFavorites($inputData['hotelId']);
+            exit();
+} else if($uriParts[0] === 'user-info') {
+    $userController = new UserController();
+
+    if ($requestMethod === 'GET') {
+        $userController->getUserInfo();
+    }
+    exit();
 }
+    
 
 http_response_code(404);
 echo json_encode(["error" => "Невідомий маршрут"]);
