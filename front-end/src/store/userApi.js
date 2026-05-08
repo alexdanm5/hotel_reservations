@@ -1,15 +1,17 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import {setUserInfo} from './userInfoSlice';
 
 const BASE_URL = 'http://localhost:8000'; 
 
 export const userApi = createApi({
     reducerPath: 'userApi', 
     baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
-    tagTypes: ['DeleteFavourites'],
+    tagTypes: ['DeleteFavourites', 'ChangeUserData'],
 
     endpoints: (builder) => ({
         getUserInfo: builder.query({
             query: () => `user-info`,
+            providesTags: ['ChangeUserData'],
         }),
         getUserFavourites: builder.query({
             query: () => `user/favorit-hotels`,
@@ -61,10 +63,29 @@ export const userApi = createApi({
                 invalidatesTags: ['DeleteFavourites'],
             
         }),
+        changeUserData: builder.mutation({
+            query: (userData) => ({
+                url: `changeUserData`, 
+                method: 'PUT',           
+                body: userData,           
+            }),
+            invalidatesTags: ['ChangeUserData'],
+            async onQueryStarted(userData, { dispatch, queryFulfilled }) {
+                try {
+                    const { data: response } = await queryFulfilled; 
+
+                    dispatch(setUserInfo(userData)); 
+
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }),
     }),
 });
 
 export const { useGetUserFavouritesQuery, 
                useAddHotelToFavouritesMutation, 
                useGetUserInfoQuery, 
-               useRemoveHotelFromFavouritesMutation } = userApi;
+               useRemoveHotelFromFavouritesMutation,
+               useChangeUserDataMutation } = userApi;

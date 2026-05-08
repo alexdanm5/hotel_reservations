@@ -116,6 +116,15 @@ if ($uriParts[0] === 'recommend') {
         $userController->getUserInfo();
     }
     exit();
+} else if ($uriParts[0] === 'changeUserData' && $requestMethod === 'PUT') {
+            
+            $inputData = json_decode(file_get_contents('php://input'), true);
+
+
+            $userController = new UserController();
+
+            $userController->changeUserData($inputData);
+            exit();
 }
     
 

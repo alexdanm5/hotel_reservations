@@ -7,7 +7,10 @@ const userInfoSlice = createSlice({
     initialState,
     reducers: {
         setUserInfo: (state, action) => {
-            state.userInfo = action.payload;
+            state.userInfo = {
+                ...state.userInfo, 
+                ...action.payload  
+            };
         }
     }
 });
