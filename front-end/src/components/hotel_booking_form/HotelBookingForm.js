@@ -14,12 +14,19 @@ import './hotelBookingForm.scss';
 const HotelBookingForm = () => {
     
     const navigate = useNavigate();
+    const [error, setError] = useState(false);
 
+    const errorMes = <div className='bookingForm__error'>Enter the hotel's location</div>;
 
     const handleSearch = (e) => {
         e.preventDefault();
-        const queryString = new URLSearchParams(dataForSearch).toString();
-        navigate(`/result?${queryString}`);
+        if(!dataForSearch.location === ''){
+            const queryString = new URLSearchParams(dataForSearch).toString();
+            navigate(`/result?${queryString}`);
+        }else {
+            setError(true);
+        }
+        
     }
 
     const [openDate, setOpenDate] = useState(false);
@@ -46,18 +53,24 @@ const HotelBookingForm = () => {
                     placeholder='Place' 
                     className='bookingForm__input' 
                     name='place' value={dataForSearch.location} 
-                    onChange={(e) => setDataForSearch({ ...dataForSearch, location: e.target.value })}/>
+                    onChange={(e) => {
+                        setDataForSearch({ ...dataForSearch, location: e.target.value });
+                        setError(false);
+                        }
+                    }
+                />
+               
                 <select className='bookingForm__select' 
                         name='guests' 
                         value={dataForSearch.guests} 
                         onChange={(e) => setDataForSearch({ ...dataForSearch, guests: e.target.value })}
                 >
-                    <option value="">Guests</option>
                     <option value="1">1 Guest</option>
                     <option value="2">2 Guests</option>
                     <option value="3">3 Guests</option>
                     <option value="4">4 Guests</option>
                 </select>
+                 {error ? errorMes : null}
                 <div className="bookingForm__wrapper">
 
                     <span 

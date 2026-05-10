@@ -79,10 +79,6 @@ const PaymantData = () => {
                 </div>
                 <Field className="paymantData__inputs-name" type="text" placeholder='Name' name="name" />
                 <ErrorMessage name="name" className="paymantData__error" />
-                <div className='paymantData__save'>
-                    <Field type="checkbox" id='save' />
-                    <label htmlFor="save">Save this credit card</label>
-                </div>
                 <div className='paymantData__btn'>
                     <MainBtn text="Go to Confirmation" onClick={null} />
                 </div>
