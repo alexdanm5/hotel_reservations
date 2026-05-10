@@ -18,6 +18,8 @@ const ReservationPersonalData = lazy(() => import('../pages/Reservation_personal
 const ReservationPaymantData = lazy(() => import('../pages/Reservation_paymant_data'));
 const ReservationConfirm = lazy(() => import('../pages/Reservation_confirm'));
 
+const Page404 = lazy(() => import('../pages/404'));
+
 
 
 
@@ -42,6 +44,8 @@ function App() {
             <Route path='/reservation_personal_data' element={<ReservationPersonalData />} />
             <Route path='/reservation_paymant_data' element={<ReservationPaymantData />} />
             <Route path='/reservation_confirm' element={<ReservationConfirm />} />
+
+            <Route path='*' element={<Page404/>}/>
           </Routes>
         </Suspense>
     </div>
