@@ -1,7 +1,12 @@
 
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
-import card from "../../assets/user/card.png";
+import { setAuthorization } from '../../store/authorizationSlice';
+import { clearUserInfo } from "../../store/userInfoSlice";
+
+import MainBtn from "../main_btn/MainBtn";
+
 import like from "../../assets/user/like.png";
 import settings from "../../assets/user/settings.png";
 import "./menu.scss";
@@ -9,6 +14,13 @@ import "./menu.scss";
 
 const UserHendler = () => {
 
+    const dispatch = useDispatch();
+
+    const logOut = () => {
+        dispatch(setAuthorization(false));
+        localStorage.removeItem('token');
+        dispatch(clearUserInfo());
+    }
 
     return(
         <div className="menu">
@@ -20,15 +32,12 @@ const UserHendler = () => {
             </div>
             <div className="menu__items">
                 <div className="menu__icon">
-                    <img src={card} alt="Payment" />
-                </div>
-                <Link to="payment" className="menu__link">Payment</Link>
-            </div>
-            <div className="menu__items">
-                <div className="menu__icon">
                     <img src={settings} alt="Settings" />
                 </div>
                 <Link to="settings" className="menu__link">Settings</Link>
+            </div>
+            <div className="menu__btn">
+                <MainBtn text="LogOut" onClick={logOut}/>
             </div>
         </div>
     )

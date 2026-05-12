@@ -29,9 +29,7 @@ const Result = () => {
     }
     return (
         <div style={{ position: "relative", paddingBottom: "100px" }}>
-            <div style={{ paddingLeft: "18px", marginTop: "20px" }}><SearchBar /></div>
 
-            
             <div style={{marginTop: "20px"}}>
                 {status || <HotelList hotels={hotels} />}
             </div>

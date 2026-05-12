@@ -1,4 +1,4 @@
-
+import { useSelector } from 'react-redux';
 import { useAddHotelToFavouritesMutation, 
          useGetUserFavouritesQuery, 
          useRemoveHotelFromFavouritesMutation } from '../../store/userApi';
@@ -11,9 +11,11 @@ import './preview.scss';
 
 const HotelCardPreview = ({ hotel }) => {
 
+    const isLog = useSelector(state => state.authorization.trigger)
+
     const { id, name, photo, rating } = hotel;
 
-    const { data: favourites = [] } = useGetUserFavouritesQuery();
+    const { data: favourites = [] } = useGetUserFavouritesQuery(undefined, {skip: !isLog});
     
     const [addHotelToFavourites] = useAddHotelToFavouritesMutation();
     const [removeHotelFromFavourites] = useRemoveHotelFromFavouritesMutation();

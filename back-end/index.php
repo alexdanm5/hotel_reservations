@@ -125,6 +125,26 @@ if ($uriParts[0] === 'recommend') {
 
             $userController->changeUserData($inputData);
             exit();
+} else if ($uriParts[0] === 'reservation' && $requestMethod === 'PUT') {
+            
+            $inputData = json_decode(file_get_contents('php://input'), true);
+
+            $hotelController = new HotelController();
+            $hotelController -> hotelReservation(($inputData));
+
+            // $userController = new UserController();
+
+            // $userController->changeUserData($inputData);
+            exit();
+} else if ($uriParts[0] === 'login' && $requestMethod === 'POST') {
+    
+    $inputData = json_decode(file_get_contents('php://input'), true);
+    
+    require_once 'controllers/AuthController.php';
+    $authController = new AuthController();
+    $authController->login($inputData);
+    
+    exit();
 }
     
 

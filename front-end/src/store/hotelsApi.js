@@ -25,8 +25,14 @@ export const hotelsApi = createApi({
     }),
     getHotelsBySearchParameters: builder.query({
       query: (obj) => ({ url: `/result`, params: obj })
+    }),
+    reservationHotel: builder.mutation({
+      query: (reservationData) => ({
+          url: `reservation`, 
+          method: 'PUT',           
+          body: reservationData,           
+      }),
     })
-
   }),
 });
 
@@ -35,4 +41,5 @@ export const { useGetRecommendedHotelsQuery,
                useGetHotelByIdQuery, 
                useGetHotelsByInputedValueQuery, 
                useGetRoomListByHotelIdQuery,
-               useGetHotelsBySearchParametersQuery } = hotelsApi;
+               useGetHotelsBySearchParametersQuery,
+               useReservationHotelMutation } = hotelsApi;

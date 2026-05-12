@@ -16,6 +16,7 @@ const RoomsList = () => {
     const navigate = useNavigate()
     const location = useLocation();
 
+
     const availableRoomIds = location.state?.availableRoomIds || [];
 
     const handleBack = () => {

@@ -81,6 +81,13 @@ export const userApi = createApi({
                 }
             }
         }),
+        loginUser: builder.mutation({
+            query: (credentials) => ({
+                url: `login`, 
+                method: 'POST',           
+                body: credentials, 
+            }),
+        }),
     }),
 });
 
@@ -88,4 +95,5 @@ export const { useGetUserFavouritesQuery,
                useAddHotelToFavouritesMutation, 
                useGetUserInfoQuery, 
                useRemoveHotelFromFavouritesMutation,
-               useChangeUserDataMutation } = userApi;
+               useChangeUserDataMutation,
+               useLoginUserMutation } = userApi;

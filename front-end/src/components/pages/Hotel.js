@@ -21,6 +21,7 @@ const Hotel = () => {
     const navigateBack = useNavigate();
     const navigateToRoomsList = useNavigate();
 
+
     const availableRoomIds = location.state?.availableRoomIds || [];
 
     const handleSelectRooms = () => {

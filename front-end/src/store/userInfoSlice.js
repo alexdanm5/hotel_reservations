@@ -11,10 +11,13 @@ const userInfoSlice = createSlice({
                 ...state.userInfo, 
                 ...action.payload  
             };
+        },
+        clearUserInfo: (state) => {
+            return initialState;
         }
     }
 });
 
 const { actions, reducer } = userInfoSlice;
 export default reducer;
-export const { setUserInfo } = actions;
+export const { setUserInfo, clearUserInfo } = actions;

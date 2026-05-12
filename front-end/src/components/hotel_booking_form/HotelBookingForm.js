@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { DateRange } from 'react-date-range';
 import {useState} from 'react';
+import { useDispatch} from 'react-redux';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
+import { setReservationData }  from "../../store/hotelReservationDataSlice";
 
 import MainBtn from '../main_btn/MainBtn';
 
@@ -12,6 +14,8 @@ import 'react-date-range/dist/theme/default.css';
 import './hotelBookingForm.scss';
 
 const HotelBookingForm = () => {
+
+    const dispatch = useDispatch();
     
     const navigate = useNavigate();
     const [error, setError] = useState(false);
@@ -20,7 +24,8 @@ const HotelBookingForm = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if(!dataForSearch.location === ''){
+        if(dataForSearch.location !== ''){
+            dispatch(setReservationData(dataForSearch));
             const queryString = new URLSearchParams(dataForSearch).toString();
             navigate(`/result?${queryString}`);
         }else {

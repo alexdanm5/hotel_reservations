@@ -34,12 +34,14 @@ const Page404 = lazy(() => import('../pages/404'));
 
 function App() {
   const dispatch = useDispatch();
-    const { data: userInfo, isLoading } = useGetUserInfoQuery();
+  const { data: userInfo, isLoading } = useGetUserInfoQuery();
+
 
     useEffect(() => {
-        if (userInfo) {
-            dispatch(setUserInfo(userInfo));
-        }
+      const token = localStorage.getItem('token');
+      if (token) {
+          dispatch(setUserInfo(userInfo));
+      }
     }, [userInfo, dispatch]);
     
     if(isLoading) {return <img style={{'margin': '40px auto 0 auto'}} src={spiner} alt='spinner' />;}
