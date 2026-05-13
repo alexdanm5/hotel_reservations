@@ -352,8 +352,7 @@ class HotelController {
         $statusCode = $http_response_header[0];
     
         if (strpos($statusCode, '200') !== false) {
-            http_response_code(200);
-            echo json_encode(["success" => true, "message" => "Элемент успешно добавлен в массив"]);
+            return true;
         } else {
             http_response_code(400);
             echo json_encode(["error" => "Ошибка при обновлении массива", "firebase_response" => json_decode($response)]);

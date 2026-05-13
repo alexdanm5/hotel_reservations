@@ -214,5 +214,55 @@ class UserController {
             echo json_encode(["error" => "Помилка Firebase", "details" => json_decode($response)]);
         }
     }
+    public function sendNotification($inputData) {
+        $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
+        $fullDocumentPath = "projects/{$this->projectId}/databases/(default)/documents/users/0aYgHkZfBSaxBmGUGhkh";
 
+        $hotel = $inputData['name'];
+        $room =  $inputData['type'];
+        $startDate = $inputData['startDate'];
+        $endDate = $inputData['endDate'];
+
+        $data = [
+            'writes' => [
+                [
+                    'transform' => [
+                        'document' => $fullDocumentPath,
+                        'fieldTransforms' => [
+                            [
+                                'fieldPath' => 'notifications', 
+                                'appendMissingElements' => [
+                                    'values' => [
+                                        ['stringValue' => "You have booked a room at the $hotel. Your room type is $room. Date: $startDate through $endDate."] 
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $options = [
+            'http' => [
+                'header'  => "Content-Type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'ignore_errors' => true
+            ]
+        ];
+
+        $context  = stream_context_create($options);
+        $response = file_get_contents($commitUrl, false, $context);
+        $statusCode = $http_response_header[0];
+
+        if (strpos($statusCode, '200') !== false) {
+            http_response_code(200);
+            echo json_encode(["success" => true]); 
+        } else {
+            http_response_code(400);
+            echo json_encode(["error" => "Помилка Firebase", "details" => json_decode($response)]);
+        }
+        
+    }
 }   

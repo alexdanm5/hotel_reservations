@@ -130,11 +130,12 @@ if ($uriParts[0] === 'recommend') {
             $inputData = json_decode(file_get_contents('php://input'), true);
 
             $hotelController = new HotelController();
-            $hotelController -> hotelReservation(($inputData));
+            $isSuccess = $hotelController -> hotelReservation(($inputData));
 
-            // $userController = new UserController();
-
-            // $userController->changeUserData($inputData);
+            if($isSuccess) {
+                $userController = new UserController();
+                $userController->sendNotification($inputData);
+            }
             exit();
 } else if ($uriParts[0] === 'login' && $requestMethod === 'POST') {
     
