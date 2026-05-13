@@ -1,5 +1,6 @@
 
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import { useLoginUserMutation } from "../../store/userApi"
 
@@ -28,6 +29,7 @@ const LogInPage = () => {
     const [loginUser, {isLoading}] = useLoginUserMutation();
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const sendData = async (values) => {
         try {
@@ -37,6 +39,7 @@ const LogInPage = () => {
 
             localStorage.setItem('token', token);
             dispatch(setAuthorization(true));
+            navigate('/');
 
         } catch (error) {
             console.error("Authorization error:", error);

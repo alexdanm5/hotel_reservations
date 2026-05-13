@@ -6,12 +6,12 @@ const BASE_URL = 'http://localhost:8000';
 export const userApi = createApi({
     reducerPath: 'userApi', 
     baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
-    tagTypes: ['DeleteFavourites', 'ChangeUserData'],
+    tagTypes: ['DeleteFavourites', 'ChangeUserData', 'RemoveNotifications'],
 
     endpoints: (builder) => ({
         getUserInfo: builder.query({
             query: () => `user-info`,
-            providesTags: ['ChangeUserData'],
+            providesTags: ['ChangeUserData', 'DeleteNotifications', 'RemoveNotifications'],
         }),
         getUserFavourites: builder.query({
             query: () => `user/favorit-hotels`,
@@ -88,6 +88,14 @@ export const userApi = createApi({
                 body: credentials, 
             }),
         }),
+        removeNotifications: builder.mutation({
+            query: (notifications) => ({
+                url: `removeNotifications`,
+                method: 'DELETE',
+                body: notifications
+            }),
+            invalidatesTags: ['RemoveNotifications']
+        })
     }),
 });
 
@@ -96,4 +104,5 @@ export const { useGetUserFavouritesQuery,
                useGetUserInfoQuery, 
                useRemoveHotelFromFavouritesMutation,
                useChangeUserDataMutation,
-               useLoginUserMutation } = userApi;
+               useLoginUserMutation,
+               useRemoveNotificationsMutation } = userApi;

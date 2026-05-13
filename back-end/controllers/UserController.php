@@ -5,264 +5,208 @@ class UserController {
     private $apiUrl;
 
     public function __construct() {
-        $this->apiUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents/users/";
+        $this->apiUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents/";
     }
 
-    public function getUserInfo() {
-        $response = file_get_contents($this->apiUrl . '0aYgHkZfBSaxBmGUGhkh' );
+    private function sendResponse($data, $statusCode = 200) {
+        http_response_code($statusCode);
+        echo json_encode($data);
+        exit(); 
+    }
+
+    private function fetchFromFirestore($endpoint) {
+        $response = @file_get_contents($this->apiUrl . $endpoint);
+        return $response !== false ? json_decode($response, true) : null;
+    }
+
+
+    private function commitToFirestore($writes) {
+        $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
         
-        if ($response === false) {
-            return null; 
+        $options = [
+            'http' => [
+                'header'  => "Content-Type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => json_encode(['writes' => $writes]),
+                'ignore_errors' => true
+            ]
+        ];
+
+        $context  = stream_context_create($options);
+        $response = file_get_contents($commitUrl, false, $context);
+        $statusCode = $http_response_header[0];
+
+        if (strpos($statusCode, '200') !== false) {
+            return true;
         }
 
-        $doc = json_decode($response, true);
-        $fields = $doc['fields'] ?? []; 
-        $favoriteHotels = [];
+        error_log("Firestore Commit Error: " . $response);
+        return false;
+    }
 
-        foreach ($fields['liked']['arrayValue']['values'] as $item) {
-            if (isset($item['stringValue'])) {
-                $favoriteHotels [] = $item['stringValue']; 
-            }
+    private function extractFieldValue($field) {
+        if (!isset($field)) return null;
+        if (isset($field['stringValue'])) return $field['stringValue'];
+        if (isset($field['integerValue'])) return (int)$field['integerValue'];
+        if (isset($field['doubleValue'])) return (float)$field['doubleValue'];
+        if (isset($field['booleanValue'])) return $field['booleanValue'];
+        if (isset($field['arrayValue']['values'])) {
+            return array_map([$this, 'extractFieldValue'], $field['arrayValue']['values']);
         }
+        return null;
+    }
+
+ 
+    private function getUserDocumentPath($userId) {
+        return "projects/{$this->projectId}/databases/(default)/documents/users/{$userId}";
+    }
+
+    
+    public function getUserInfo($userId = '0aYgHkZfBSaxBmGUGhkh') {
+        $doc = $this->fetchFromFirestore("users/{$userId}");
+        
+        if (!$doc || !isset($doc['fields'])) {
+            $this->sendResponse(["error" => "Пользователь не найден"], 404);
+        }
+
+        $fields = $doc['fields'];
+
         $userInfo = [
-            'firstName' => $fields['firstName']['stringValue'] ?? '',
-            'lastName' => $fields['lastName']['stringValue'] ?? '',
-            'photo' => $fields['photo']['stringValue'] ?? '',
-            'favoriteHotels' => $favoriteHotels
+            'firstName'      => $this->extractFieldValue($fields['firstName'] ?? null) ?: '',
+            'lastName'       => $this->extractFieldValue($fields['lastName'] ?? null) ?: '',
+            'photo'          => $this->extractFieldValue($fields['photo'] ?? null) ?: '',
+            'favoriteHotels' => $this->extractFieldValue($fields['liked'] ?? null) ?: [],
+            'notifications'  => $this->extractFieldValue($fields['notifications'] ?? null) ?: []
         ];
 
-        http_response_code(200);
-        echo json_encode($userInfo);
+        $this->sendResponse($userInfo);
     }
 
-    public function getFavoritesHotels() {
-        $response = file_get_contents($this->apiUrl . '0aYgHkZfBSaxBmGUGhkh' );
-        
-        if ($response === false) {
-            return null; 
-        }
 
-        $doc = json_decode($response, true);
-        $fields = $doc['fields'] ?? []; 
-        $favoritesHotelsId = [];
+    public function getFavoritesHotels($userId = '0aYgHkZfBSaxBmGUGhkh') {
+        $doc = $this->fetchFromFirestore("users/{$userId}");
+        if (!$doc || !isset($doc['fields'])) return [];
 
-        $rowHotelsId = isset($fields['liked']['arrayValue']['values']) 
-                    ? $fields['liked']['arrayValue']['values'] 
-                    : [];
-        
-        foreach ($rowHotelsId as $item) {
-            if (isset($item['stringValue'])) {
-                $favoritesHotelsId[] = $item['stringValue']; 
-            }
-        }
-        return $favoritesHotelsId;
+        return $this->extractFieldValue($doc['fields']['liked'] ?? null) ?: [];
     }
 
-    public function addHotelToFavorites($hotelId) {
-        $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
-        $fullDocumentPath = "projects/{$this->projectId}/databases/(default)/documents/users/0aYgHkZfBSaxBmGUGhkh";
-
-        $data = [
-            'writes' => [
-                [
-                    'transform' => [
-                        'document' => $fullDocumentPath,
-                        'fieldTransforms' => [
-                            [
-                                'fieldPath' => 'liked', 
-                                'appendMissingElements' => [
-                                    'values' => [
-                                        ['stringValue' => $hotelId] 
-                                    ]
-                                ]
-                            ]
-                        ]
+    public function addHotelToFavorites($hotelId, $userId = '0aYgHkZfBSaxBmGUGhkh') {
+        $writes = [[
+            'transform' => [
+                'document' => $this->getUserDocumentPath($userId),
+                'fieldTransforms' => [[
+                    'fieldPath' => 'liked', 
+                    'appendMissingElements' => [
+                        'values' => [['stringValue' => $hotelId]]
                     ]
-                ]
+                ]]
             ]
-        ];
-    
-        $options = [
-            'http' => [
-                'header'  => "Content-Type: application/json\r\n",
-                'method'  => 'POST',
-                'content' => json_encode($data),
-                'ignore_errors' => true
-            ]
-        ];
+        ]];
 
-        $context  = stream_context_create($options);
-        $response = file_get_contents($commitUrl, false, $context);
-
-        $statusCode = $http_response_header[0];
-    
-        if (strpos($statusCode, '200') !== false) {
-            http_response_code(200);
-            echo json_encode(["success" => true, "message" => "Элемент успешно добавлен в массив"]);
+        if ($this->commitToFirestore($writes)) {
+            $this->sendResponse(["success" => true, "message" => "Элемент успешно добавлен"]);
         } else {
-            http_response_code(400);
-            echo json_encode(["error" => "Ошибка при обновлении массива", "firebase_response" => json_decode($response)]);
+            $this->sendResponse(["error" => "Ошибка при добавлении в избранное"], 400);
         }
     }
 
-    public function removeHotelFromFavorites($hotelId) {
-        $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
-        $fullDocumentPath = "projects/{$this->projectId}/databases/(default)/documents/users/0aYgHkZfBSaxBmGUGhkh";
-
-        $data = [
-            'writes' => [
-                [
-                    'transform' => [
-                        'document' => $fullDocumentPath,
-                        'fieldTransforms' => [
-                            [
-                                'fieldPath' => 'liked', 
-                                'removeAllFromArray' => [
-                                    'values' => [
-                                        ['stringValue' => $hotelId] 
-                                    ]
-                                ]
-                            ]
-                        ]
+    public function removeHotelFromFavorites($hotelId, $userId = '0aYgHkZfBSaxBmGUGhkh') {
+        $writes = [[
+            'transform' => [
+                'document' => $this->getUserDocumentPath($userId),
+                'fieldTransforms' => [[
+                    'fieldPath' => 'liked', 
+                    'removeAllFromArray' => [
+                        'values' => [['stringValue' => $hotelId]]
                     ]
-                ]
+                ]]
             ]
-        ];
-    
-        $options = [
-            'http' => [
-                'header'  => "Content-Type: application/json\r\n",
-                'method'  => 'POST',
-                'content' => json_encode($data),
-                'ignore_errors' => true
-            ]
-        ];
+        ]];
 
-        $context  = stream_context_create($options);
-        $response = file_get_contents($commitUrl, false, $context);
-
-        $statusCode = $http_response_header[0];
-    
-        if (strpos($statusCode, '200') !== false) {
-            http_response_code(200);
-            echo json_encode(["success" => true, "message" => "Элемент успешно удален из массива"]);
+        if ($this->commitToFirestore($writes)) {
+            $this->sendResponse(["success" => true, "message" => "Элемент успешно удален"]);
         } else {
-            http_response_code(400);
-            echo json_encode(["error" => "Ошибка при обновлении массива", "firebase_response" => json_decode($response)]);
+            $this->sendResponse(["error" => "Ошибка при удалении из избранного"], 400);
         }
     }
-    public function changeUserData($userData) {
-        $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
-        $fullDocumentPath = "projects/{$this->projectId}/databases/(default)/documents/users/0aYgHkZfBSaxBmGUGhkh";
 
+    public function changeUserData($userData, $userId = '0aYgHkZfBSaxBmGUGhkh') {
         $fields = [];
         $fieldPaths = [];
 
-        if (isset($userData['firstName'])) {
-        $fields['firstName'] = ['stringValue' => $userData['firstName']];
-        $fieldPaths[] = 'firstName';
-        }
-
-        if (isset($userData['lastName'])) {
-            $fields['lastName'] = ['stringValue' => $userData['lastName']];
-            $fieldPaths[] = 'lastName'; 
-        }
-
-        if (isset($userData['email'])) {
-            $fields['email'] = ['stringValue' => $userData['email']];
-            $fieldPaths[] = 'email'; 
+        $allowedFields = ['firstName', 'lastName', 'email'];
+        foreach ($allowedFields as $field) {
+            if (isset($userData[$field])) {
+                $fields[$field] = ['stringValue' => $userData[$field]];
+                $fieldPaths[] = $field;
+            }
         }
 
         if (empty($fields)) {
-            http_response_code(200);
-            echo json_encode(["message" => "Нет данных для обновления"]);
-            return;
+            $this->sendResponse(["message" => "Нет данных для обновления"]);
         }
 
-        $data = [
-            'writes' => [
-                [
-                    'update' => [
-                        'name' => $fullDocumentPath,
-                        'fields' => $fields 
-                    ],
-                    'updateMask' => [
-                        'fieldPaths' => $fieldPaths 
-                    ]
-                ]
+        $writes = [[
+            'update' => [
+                'name' => $this->getUserDocumentPath($userId),
+                'fields' => $fields 
+            ],
+            'updateMask' => [
+                'fieldPaths' => $fieldPaths 
             ]
-        ];
+        ]];
 
-        $options = [
-            'http' => [
-                'header'  => "Content-Type: application/json\r\n",
-                'method'  => 'POST',
-                'content' => json_encode($data),
-                'ignore_errors' => true
-            ]
-        ];
-
-        $context  = stream_context_create($options);
-        $response = file_get_contents($commitUrl, false, $context);
-        $statusCode = $http_response_header[0];
-
-        if (strpos($statusCode, '200') !== false) {
-            http_response_code(200);
-            echo json_encode(["success" => true, "data" => $userData]); 
+        if ($this->commitToFirestore($writes)) {
+            $this->sendResponse(["success" => true, "data" => $userData]);
         } else {
-            http_response_code(400);
-            echo json_encode(["error" => "Помилка Firebase", "details" => json_decode($response)]);
+            $this->sendResponse(["error" => "Ошибка Firebase при обновлении профиля"], 400);
         }
     }
-    public function sendNotification($inputData) {
-        $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
-        $fullDocumentPath = "projects/{$this->projectId}/databases/(default)/documents/users/0aYgHkZfBSaxBmGUGhkh";
 
-        $hotel = $inputData['name'];
-        $room =  $inputData['type'];
-        $startDate = $inputData['startDate'];
-        $endDate = $inputData['endDate'];
-
-        $data = [
-            'writes' => [
-                [
-                    'transform' => [
-                        'document' => $fullDocumentPath,
-                        'fieldTransforms' => [
-                            [
-                                'fieldPath' => 'notifications', 
-                                'appendMissingElements' => [
-                                    'values' => [
-                                        ['stringValue' => "You have booked a room at the $hotel. Your room type is $room. Date: $startDate through $endDate."] 
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $options = [
-            'http' => [
-                'header'  => "Content-Type: application/json\r\n",
-                'method'  => 'POST',
-                'content' => json_encode($data),
-                'ignore_errors' => true
-            ]
-        ];
-
-        $context  = stream_context_create($options);
-        $response = file_get_contents($commitUrl, false, $context);
-        $statusCode = $http_response_header[0];
-
-        if (strpos($statusCode, '200') !== false) {
-            http_response_code(200);
-            echo json_encode(["success" => true]); 
-        } else {
-            http_response_code(400);
-            echo json_encode(["error" => "Помилка Firebase", "details" => json_decode($response)]);
-        }
+    public function sendNotification($inputData, $userId = '0aYgHkZfBSaxBmGUGhkh') {
+        $hotel = $inputData['name'] ?? 'отеле';
+        $room = $inputData['type'] ?? 'номер';
+        $startDate = $inputData['startDate'] ?? '';
+        $endDate = $inputData['endDate'] ?? '';
         
+        $message = "You have booked a room at the {$hotel}. Your room type is {$room}. Date: {$startDate} through {$endDate}.";
+
+        $writes = [[
+            'transform' => [
+                'document' => $this->getUserDocumentPath($userId),
+                'fieldTransforms' => [[
+                    'fieldPath' => 'notifications', 
+                    'appendMissingElements' => [
+                        'values' => [['stringValue' => $message]]
+                    ]
+                ]]
+            ]
+        ]];
+
+        if ($this->commitToFirestore($writes)) {
+            $this->sendResponse(["success" => true]);
+        } else {
+            $this->sendResponse(["error" => "Ошибка при отправке уведомления"], 400);
+        }
     }
-}   
+
+    public function removeNotifications($inputData, $userId = '0aYgHkZfBSaxBmGUGhkh') {
+        $writes = [[
+            'update' => [
+                'name' => $this->getUserDocumentPath($userId), 
+                'fields' => [
+                    'notifications' => ['arrayValue' => ['values' => []]]
+                ]
+            ],
+            'updateMask' => [
+                'fieldPaths' => ['notifications']
+            ]
+        ]];
+
+        if ($this->commitToFirestore($writes)) {
+            $this->sendResponse(["success" => true]);
+        } else {
+            $this->sendResponse(["error" => "Ошибка при очистке уведомлений"], 400);
+        }
+    }
+}

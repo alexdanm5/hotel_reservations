@@ -1,4 +1,5 @@
 <?php
+
 class HotelController {
     private $projectId = 'hotel-booking-a3022'; 
     private $apiUrl;
@@ -7,298 +8,117 @@ class HotelController {
         $this->apiUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents/";
     }
 
-    private function getHotelsIds($collection) {
-        $response = file_get_contents($this->apiUrl . $collection);
+    private function sendResponse($data, $statusCode = 200) {
+        http_response_code($statusCode);
+        echo json_encode($data);
+        exit(); 
+    }
+
+
+    private function fetchFromFirestore($endpoint) {
+        $response = @file_get_contents($this->apiUrl . $endpoint);
+        return $response !== false ? json_decode($response, true) : null;
+    }
+
+
+    private function extractFieldValue($field) {
+        if (!isset($field)) return null;
+        if (isset($field['stringValue'])) return $field['stringValue'];
+        if (isset($field['integerValue'])) return (int)$field['integerValue'];
+        if (isset($field['doubleValue'])) return (float)$field['doubleValue'];
+        if (isset($field['booleanValue'])) return $field['booleanValue'];
         
-        if ($response === false) {
-            return []; 
+        if (isset($field['arrayValue']['values'])) {
+            return array_map([$this, 'extractFieldValue'], $field['arrayValue']['values']);
         }
+        return null;
+    }
 
-        $firestoreData = json_decode($response, true);
+
+    private function extractIdFromName($namePath) {
+        $parts = explode('/', $namePath);
+        return end($parts);
+    }
+
+
+    private function getHotelDataById($id) {
+        $doc = $this->fetchFromFirestore("hotels/{$id}");
+        if (!$doc || !isset($doc['fields'])) return null;
+
+        $fields = $doc['fields'];
+
+        return [
+            'id'          => $id,
+            'name'        => $this->extractFieldValue($fields['name'] ?? null) ?: '',
+            'location'    => $this->extractFieldValue($fields['location'] ?? null) ?: '',
+            'description' => $this->extractFieldValue($fields['description'] ?? null) ?: '',
+            'rating'      => $this->extractFieldValue($fields['rating'] ?? null) ?: 0.0,
+            'priceFrom'   => $this->extractFieldValue($fields['priceFrom'] ?? null) ?: 0,
+            'photo'       => $this->extractFieldValue($fields['photo'] ?? null) ?: [],
+            'options'     => $this->extractFieldValue($fields['options'] ?? null) ?: []
+        ];
+    }
+
+    private function getAllHotels() {
+        $doc = $this->fetchFromFirestore('hotels');
+        if (!$doc || empty($doc['documents'])) return [];
+
+        $allHotels = [];
+        foreach($doc['documents'] as $hotelDoc) {
+            $fields = $hotelDoc['fields'] ?? [];
+            $allHotels[] = [
+                'id'       => $this->extractIdFromName($hotelDoc['name']),
+                'name'     => $this->extractFieldValue($fields['name'] ?? null) ?: '',
+                'location' => $this->extractFieldValue($fields['location'] ?? null) ?: '',
+            ];
+        }
+        return $allHotels;
+    }
+
+    private function getHotelsIds($collection) {
+        $doc = $this->fetchFromFirestore($collection);
+        if (!$doc || empty($doc['documents'])) return [];
+
         $cleanHotelsId = [];
-
-        if (isset($firestoreData['documents'])) {
-            foreach ($firestoreData['documents'] as $doc) {
-                $fields = $doc['fields'];
-
-                $rawHotelsId = isset($fields['hotelsId']['arrayValue']['values']) 
-                    ? $fields['hotelsId']['arrayValue']['values'] 
-                    : [];
-
-                foreach ($rawHotelsId as $item) {
-                    if (isset($item['stringValue'])) {
-                        $cleanHotelsId[] = $item['stringValue']; 
-                    }
-                }
-            }
+        foreach ($doc['documents'] as $document) {
+            $ids = $this->extractFieldValue($document['fields']['hotelsId'] ?? null) ?: [];
+            $cleanHotelsId = array_merge($cleanHotelsId, $ids);
         }
         return $cleanHotelsId; 
     }
 
-    private function getAllHotels() {
-        $response = file_get_contents($this->apiUrl . 'hotels');
-        
-        if ($response === false) {
-            return null; 
-        }
-
-        $doc = json_decode($response, true);
-        $document = $doc['documents'] ?? []; 
-        $allHotels = [];
-
-        foreach($document as $hotelDoc) {
-            $hotelId = strripos($hotelDoc['name'], '/') + 1;
-            $hotelId = substr($hotelDoc['name'], $hotelId); 
-            $fields = $hotelDoc['fields'] ?? [];
-            $hotel = [
-                'id' => $hotelId,
-                'name' => isset($fields['name']['stringValue']) ? $fields['name']['stringValue'] : '',
-                'location' => isset($fields['location']['stringValue']) ? $fields['location']['stringValue'] : '',
-            ];
-            $allHotels[] = $hotel;
-        }
-
-        return $allHotels;
-
-    }
-
-    public function fetchHotelData($id) {
-        $response = file_get_contents($this->apiUrl . 'hotels/' . $id);
-        
-        if ($response === false) {
-            return null; 
-        }
-
-        $doc = json_decode($response, true);
-        $fields = $doc['fields'] ?? []; 
-        $photoUrl = [];
-        $options = [];
-
-        $rowPhotoUrls = isset($fields['photo']['arrayValue']['values']) 
-                    ? $fields['photo']['arrayValue']['values'] 
-                    : [];
-        
-        $rowOptions = isset($fields['options']['arrayValue']['values']) 
-                    ? $fields['options']['arrayValue']['values'] 
-                    : [];
-        
-        foreach ($rowPhotoUrls as $item) {
-            if (isset($item['stringValue'])) {
-                $photoUrl[] = $item['stringValue']; 
-            }
-        }
-
-        foreach ($rowOptions as $item) {
-            if (isset($item['stringValue'])) {
-                $options[] = $item['stringValue']; 
-            }
-        }
-
-        $hotel = [
-            'id' => $id,
-            'name' => isset($fields['name']['stringValue']) ? $fields['name']['stringValue'] : '',
-            'location' => isset($fields['location']['stringValue']) ? $fields['location']['stringValue'] : '',
-            'description' => isset($fields['description']['stringValue']) ? $fields['description']['stringValue'] : '',
-            'rating' => isset($fields['rating']['doubleValue']) ? $fields['rating']['doubleValue'] : 0.0,
-            'photo' => $photoUrl,
-            'options' => $options,
-            'priceFrom' => isset($fields['priceFrom']['integerValue']) ? $fields['priceFrom']['integerValue'] : 0
-
-        ];
-
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        
-        $callerClass = $trace[1]['class'] ?? null;
-
-        if ($callerClass === __CLASS__) {
-            return $hotel; 
-        } else {
-            http_response_code(200);
-            echo json_encode($hotel);
-        }
-        
-    }
-
-    public function getSomeHotelsById($ids) {
-        $hotels = [];
-        foreach ($ids as $id) {
-            $hotelData = $this->fetchHotelData($id);
-            if ($hotelData !== null) {
-                $hotels[] = $hotelData;
-            }
-        }
-        http_response_code(200);
-        echo json_encode($hotels);
-    }
-
-    public function getSuggestionsHotels($collection) {
-        $ids = $this->getHotelsIds($collection);
-        
-        $finalHotels = [];
-
-        foreach ($ids as $id) {
-            $hotelData = $this->fetchHotelData($id);
-            
-            if ($hotelData !== null) {
-                $finalHotels[] = $hotelData;
-            }
-        }
-
-        http_response_code(200);
-        echo json_encode($finalHotels);
-    }
-
     private function filterHotelsByParam($param) {
         $allHotels = $this->getAllHotels();
-        $filteredHotels = [];
+        $filteredHotelIds = [];
+        $searchParam = mb_strtolower($param);
 
         foreach ($allHotels as $hotel) {
+            $nameMatch = mb_stripos($hotel['name'], $searchParam) !== false;
+            $locMatch = mb_stripos($hotel['location'], $searchParam) !== false;
             
-            if (stripos($hotel['name'], $param) !== false || stripos($hotel['location'], $param) !== false) {
-                $filteredHotels[] = $hotel['id'];
+            if ($nameMatch || $locMatch) {
+                $filteredHotelIds[] = $hotel['id'];
             }
         }
-
-        return $filteredHotels;
-    }
-
-    public function searchHotels($param) {
-        $filteredHotelIds = $this->filterHotelsByParam($param);
-        $finalHotels = [];
-
-        foreach ($filteredHotelIds as $id) {
-            $hotelData = $this->fetchHotelData($id);
-            
-            if ($hotelData !== null) {
-                $finalHotels[] = $hotelData;
-            }
-        }
-
-        http_response_code(200);
-        echo json_encode($finalHotels);
-    }
-
-    public function getHotelsByParam($location, $guests, $startDate, $endDate) {
-        $filteredByLocation = $this->filterHotelsByParam($location);
-        $filteredByCapacity = [];
-        $filteredHotels = [];
-        $isAvailable  = [];
-
-        foreach ($filteredByLocation as $id) {
-            $capacityFilteredRooms = $this->filteredRoomsByCapacity($id, $guests);
-            if (!empty($capacityFilteredRooms)) {
-                $filteredByCapacity += array($id => $capacityFilteredRooms);
-            }
-        }
-
-        foreach($filteredByCapacity as $hotelId => $roomIds) {
-            foreach ($roomIds as $roomId) {
-                $isAvailable [] = $this->filterRoomByDate($hotelId, $roomId, $startDate, $endDate);
-            }
-            if (!empty($isAvailable)) {
-                $hotelData = $this->fetchHotelData($hotelId);
-                $hotelData['availableRooms'] = $isAvailable;
-                $filteredHotels[] = $hotelData;
-            }
-        }
-
-
-        http_response_code(200);
-        echo json_encode($filteredHotels);
-    }
-
-    public function getRoomsListByHotelId($hotelId) {
-        $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms');
-        
-        if ($response === false) {
-            return null; 
-        }
-
-        $doc = json_decode($response, true);
-        $document = $doc['documents'] ?? []; 
-        $roomsList = [];
-
-        foreach($document as $roomDoc) {
-            $roomId = strripos($roomDoc['name'], '/') + 1;
-            $roomId = substr($roomDoc['name'], $roomId); 
-            $fields = $roomDoc['fields'] ?? [];
-            $options = [];
-            $photoUrl = [];
-            foreach ($fields['options']['arrayValue']['values'] as $item) {
-                if (isset($item['stringValue'])) {
-                    $options[] = $item['stringValue']; 
-                }
-            }
-            foreach ($fields['photo']['arrayValue']['values'] as $item) {
-                if (isset($item['stringValue'])) {
-                    $photoUrl[] = $item['stringValue']; 
-                }
-            }
-            $room = [
-                'id' => $roomId,
-                'type' => isset($fields['type']['stringValue']) ? $fields['type']['stringValue'] : '',
-                'price' => isset($fields['pricePerNight']['integerValue']) ? $fields['pricePerNight']['integerValue'] : 0.0,
-                'capacity' => isset($fields['capacity']['integerValue']) ? (int)$fields['capacity']['integerValue'] : 0,
-                'photo' => $photoUrl,
-                'options' => $options,
-            ];
-            $roomsList[] = $room;
-        }
-        http_response_code(200);
-        echo json_encode($roomsList);
-    }
-
-    private function filteredRoomsByCapacity($hotelId, $guests) {
-        $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms');
-        
-        if ($response === false) {
-            return null; 
-        }
-
-        $doc = json_decode($response, true);
-        $document = $doc['documents'] ?? []; 
-        $filteredList = [];
-
-        foreach($document as $roomDoc) {
-            $roomId = strripos($roomDoc['name'], '/') + 1;
-            $roomId = substr($roomDoc['name'], $roomId); 
-            $fields = $roomDoc['fields'] ?? [];
-
-            $capacity = isset($fields['capacity']['integerValue']) ? (int)$fields['capacity']['integerValue'] : 0;
-            if ($capacity >= (int)$guests) {
-                 $filteredList[] = $roomId;
-            }
-        }
-        return $filteredList;
+        return $filteredHotelIds;
     }
 
     private function filterRoomByDate($hotelId, $roomId, $checkIn, $checkOut) {
-        $response = file_get_contents($this->apiUrl . 'hotels/' . $hotelId . '/rooms' . '/' . $roomId);
-    
-        if ($response === false) {
-            return null; 
-        }
+        $doc = $this->fetchFromFirestore("hotels/{$hotelId}/rooms/{$roomId}");
+        if (!$doc) return null;
 
-        $doc = json_decode($response, true);
-    
         $fields = $doc['fields'] ?? [];
-
-        $dates = isset($fields['date']['arrayValue']['values']) 
-                ? $fields['date']['arrayValue']['values'] 
-                : [];
+        $dates = $this->extractFieldValue($fields['date'] ?? null) ?: [];
 
         $newCheckIn = new DateTime($checkIn);
         $newCheckOut = new DateTime($checkOut);
 
-        if(empty($dates)) {
-            return $roomId; 
-        }
-        
-        foreach ($dates as $date) {
-            $bookedDate = explode('-', $date['stringValue']);
+        foreach ($dates as $dateString) {
+            $bookedDate = explode('-', $dateString);
             $bookedStartDate = new DateTime($bookedDate[0]);
             $bookedEndDate = new DateTime($bookedDate[1]);
 
+            // Если даты пересекаются, комната занята
             if ($newCheckIn < $bookedEndDate && $newCheckOut > $bookedStartDate) {
                 return false; 
             }
@@ -306,25 +126,110 @@ class HotelController {
         return $roomId; 
     }
 
+
+    public function fetchHotelData($id) {
+        $hotel = $this->getHotelDataById($id);
+        
+        if ($hotel) {
+            $this->sendResponse($hotel);
+        } else {
+            $this->sendResponse(["error" => "Отель не найден"], 404);
+        }
+    }
+
+    public function getSomeHotelsById($ids) {
+        $hotels = [];
+        foreach ($ids as $id) {
+            $hotelData = $this->getHotelDataById($id);
+            if ($hotelData) $hotels[] = $hotelData;
+        }
+        $this->sendResponse($hotels);
+    }
+
+    public function getSuggestionsHotels($collection) {
+        $ids = $this->getHotelsIds($collection);
+        $this->getSomeHotelsById($ids); 
+    }
+
+    public function searchHotels($param) {
+        $filteredHotelIds = $this->filterHotelsByParam($param);
+        $this->getSomeHotelsById($filteredHotelIds);
+    }
+
+    public function getRoomsListByHotelId($hotelId) {
+        $doc = $this->fetchFromFirestore("hotels/{$hotelId}/rooms");
+        if (!$doc || empty($doc['documents'])) {
+            $this->sendResponse([]); 
+        }
+
+        $roomsList = [];
+        foreach($doc['documents'] as $roomDoc) {
+            $fields = $roomDoc['fields'] ?? [];
+            $roomsList[] = [
+                'id'       => $this->extractIdFromName($roomDoc['name']),
+                'type'     => $this->extractFieldValue($fields['type'] ?? null) ?: '',
+                'price'    => $this->extractFieldValue($fields['pricePerNight'] ?? null) ?: 0,
+                'capacity' => $this->extractFieldValue($fields['capacity'] ?? null) ?: 0,
+                'photo'    => $this->extractFieldValue($fields['photo'] ?? null) ?: [],
+                'options'  => $this->extractFieldValue($fields['options'] ?? null) ?: [],
+            ];
+        }
+        $this->sendResponse($roomsList);
+    }
+
+    public function getHotelsByParam($location, $guests, $startDate, $endDate) {
+        $filteredByLocation = $this->filterHotelsByParam($location);
+        $filteredHotels = [];
+
+        foreach ($filteredByLocation as $hotelId) {
+            $doc = $this->fetchFromFirestore("hotels/{$hotelId}/rooms");
+            if (!$doc || empty($doc['documents'])) continue;
+
+            $availableRooms = [];
+
+            foreach($doc['documents'] as $roomDoc) {
+                $fields = $roomDoc['fields'] ?? [];
+                $roomId = $this->extractIdFromName($roomDoc['name']);
+                $capacity = $this->extractFieldValue($fields['capacity'] ?? null) ?: 0;
+
+                if ($capacity >= (int)$guests) {
+                    if ($this->filterRoomByDate($hotelId, $roomId, $startDate, $endDate)) {
+                        $availableRooms[] = $roomId;
+                    }
+                }
+            }
+
+            if (!empty($availableRooms)) {
+                $hotelData = $this->getHotelDataById($hotelId);
+                $hotelData['availableRooms'] = $availableRooms;
+                $filteredHotels[] = $hotelData;
+            }
+        }
+
+        $this->sendResponse($filteredHotels);
+    }
+
     public function hotelReservation($hotelData) {
         $commitUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents:commit";
         $fullDocumentPath = "projects/{$this->projectId}/databases/(default)/documents/hotels/{$hotelData['hotelId']}/rooms/{$hotelData['roomId']}";
 
-       $data = [
-    'writes' => [
-        [
-            'transform' => [
-                'document' => $fullDocumentPath,
-                'fieldTransforms' => [
-                    [
-                        'fieldPath' => 'bookings', 
-                        'appendMissingElements' => [
-                            'values' => [
-                                [
-                                    'mapValue' => [
-                                        'fields' => [
-                                            'startDate' => ['stringValue' => $hotelData['startDate']],
-                                            'endDate'   => ['stringValue' => $hotelData['endDate']]
+        $data = [
+            'writes' => [
+                [
+                    'transform' => [
+                        'document' => $fullDocumentPath,
+                        'fieldTransforms' => [
+                            [
+                                'fieldPath' => 'bookings', 
+                                'appendMissingElements' => [
+                                    'values' => [
+                                        [
+                                            'mapValue' => [
+                                                'fields' => [
+                                                    'startDate' => ['stringValue' => $hotelData['startDate']],
+                                                    'endDate'   => ['stringValue' => $hotelData['endDate']]
+                                                ]
+                                            ]
                                         ]
                                     ]
                                 ]
@@ -333,9 +238,7 @@ class HotelController {
                     ]
                 ]
             ]
-        ]
-    ]
-];
+        ];
 
         $options = [
             'http' => [
@@ -348,14 +251,13 @@ class HotelController {
 
         $context  = stream_context_create($options);
         $response = file_get_contents($commitUrl, false, $context);
-
         $statusCode = $http_response_header[0];
     
         if (strpos($statusCode, '200') !== false) {
             return true;
-        } else {
-            http_response_code(400);
-            echo json_encode(["error" => "Ошибка при обновлении массива", "firebase_response" => json_decode($response)]);
-        }
+        } 
+        
+        error_log("Firebase Reservation Error: " . $response);
+        return false;
     }
 }
