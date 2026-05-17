@@ -3,6 +3,15 @@
 class AuthController {
     private $projectId = 'hotel-booking-a3022'; 
     private $apiUrl;
+    private const FIELD_EMAIL = 'email';
+    private const FIELD_PASSWORD = 'password';
+    private const FIELD_FIRST_NAME = 'firstName';
+    private const FIELD_LAST_NAME = 'lastName';
+    private const ERROR_MISSING_CREDENTIALS = "Email и пароль обязательны";
+    private const ERROR_USER_NOT_FOUND = "Пользователь с таким email не найден";
+    private const ERROR_INVALID_PASSWORD = "Неверный пароль";
+    private const ENDPOINT_USERS = 'users';
+    private const ENDPOINT_RUN_QUERY = ':runQuery';
 
     public function __construct() {
         $this->apiUrl = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents";
@@ -40,22 +49,15 @@ class AuthController {
         $parts = explode('/', $namePath);
         return end($parts);
     }
-
-
-    public function login($data) {
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
-
-        if (!$email || !$password) {
-            $this->sendResponse(["error" => "Email и пароль обязательны"], 400);
-        }
-
-        $queryPayload = [
+    
+    private function buildUserQueryByEmail(string $email): array
+    {
+        return [
             'structuredQuery' => [
-                'from'  => [['collectionId' => 'users']],
+                'from'  => [['collectionId' => self::ENDPOINT_USERS]],
                 'where' => [
                     'fieldFilter' => [
-                        'field' => ['fieldPath' => 'email'],
+                        'field' => ['fieldPath' => self::FIELD_EMAIL],
                         'op'    => 'EQUAL',
                         'value' => ['stringValue' => $email]
                     ]
@@ -63,28 +65,44 @@ class AuthController {
                 'limit' => 1 
             ]
         ];
+    }
+    
+    private function buildUserResponse(array $userDoc, string $email): array
+    {
+        $fields = $userDoc['fields'] ?? [];
+        
+        return [
+            "success"   => true,
+            "userId"    => $this->extractIdFromName($userDoc['name']),
+            "firstName" => $this->extractFieldValue($fields[self::FIELD_FIRST_NAME] ?? null) ?: '',
+            "lastName"  => $this->extractFieldValue($fields[self::FIELD_LAST_NAME] ?? null) ?: '',
+            self::FIELD_EMAIL => $email
+        ];
+    }
 
-        $firestoreData = $this->postToFirestore(':runQuery', $queryPayload);
+    public function login($data) {
+        $email = $data[self::FIELD_EMAIL] ?? null;
+        $password = $data[self::FIELD_PASSWORD] ?? null;
+
+        if (!$email || !$password) {
+            $this->sendResponse(["error" => self::ERROR_MISSING_CREDENTIALS], 400);
+        }
+        $queryPayload = $this->buildUserQueryByEmail($email);
+        $firestoreData = $this->postToFirestore(self::ENDPOINT_RUN_QUERY, $queryPayload);
 
         if (empty($firestoreData) || !isset($firestoreData[0]['document'])) {
-            $this->sendResponse(["error" => "Пользователь с таким email не найден"], 401);
+            $this->sendResponse(["error" => self::ERROR_USER_NOT_FOUND], 401);
         }
 
         $userDoc = $firestoreData[0]['document'];
         $fields = $userDoc['fields'] ?? [];
         
-        $savedPassword = $this->extractFieldValue($fields['password'] ?? null);
+        $savedPassword = $this->extractFieldValue($fields[self::FIELD_PASSWORD] ?? null);
 
         if ($password === $savedPassword) {
-            $this->sendResponse([
-                "success"   => true,
-                "userId"    => $this->extractIdFromName($userDoc['name']),
-                "firstName" => $this->extractFieldValue($fields['firstName'] ?? null) ?: '',
-                "lastName"  => $this->extractFieldValue($fields['lastName'] ?? null) ?: '',
-                "email"     => $email
-            ]);
+            $this->sendResponse($this->buildUserResponse($userDoc, $email));
         } else {
-            $this->sendResponse(["error" => "Неверный пароль"], 401);
+            $this->sendResponse(["error" => self::ERROR_INVALID_PASSWORD], 401);
         }
     }
 }
